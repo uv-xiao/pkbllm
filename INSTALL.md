@@ -27,7 +27,7 @@ npx skills add . -g -a codex --skill '*' -y
 Some skills may refer to these paths:
 
 - `PKB_PATH`: absolute path to this repository checkout
-- `HUMAN_MATERIAL_PATH`: where to store generated human-facing materials (slides, manuscripts, exercises)
+- `HUMAN_MATERIAL_PATH`: where to store generated human-facing materials (slides, manuscripts, exercises). Slider skills use `$HUMAN_MATERIAL_PATH/slides/<deck>/...`.
 
 ## Maintainers
 
