@@ -24,12 +24,6 @@
     "slug": "axolotl"
   },
   {
-    "canonical_path": "human/slider/archive/v1/baoyu-slide-deck",
-    "description": "Generates professional slide deck images from content. Creates outlines with style instructions, then generates individual slide images. Use when user asks to \"create slides\", \"make a presentation\", \"generate deck\", \"slide deck\", or \"PPT\".",
-    "name": "baoyu-slide-deck",
-    "slug": "baoyu-slide-deck"
-  },
-  {
     "canonical_path": "knowledge/ML/18-multimodal/blip-2",
     "description": "Vision-language pre-training framework bridging frozen image encoders and LLMs. Use when you need image captioning, visual question answering, image-text retrieval, or multimodal chat with state-of-the-art zero-shot performance.",
     "name": "blip-2-vision-language",
@@ -61,7 +55,7 @@
   },
   {
     "canonical_path": "human/slider/content-prompts",
-    "description": "Convert raw material into per-page Content PROMPTs by analyzing content density, intent, and slide usage. Outputs prompts/content/<deck>.md. Use when the user has notes/materials and wants a well-planned per-page content prompt before styling.",
+    "description": "Convert raw material into per-page Content PROMPTs by analyzing content density, intent, and slide usage. Outputs $HUMAN_MATERIAL_PATH/slides/<deck>/prompts/content/<deck>.md. Use when the user has notes/materials and wants a well-planned per-page content prompt before styling.",
     "name": "content-prompts",
     "slug": "content-prompts"
   },
@@ -426,12 +420,6 @@
     "slug": "rwkv-architecture"
   },
   {
-    "canonical_path": "human/slider/archive/v1/scientific-slides",
-    "description": "Build slide decks and presentations for research talks. Use this for making PowerPoint slides, conference presentations, seminar talks, research presentations, thesis defense slides, or any scientific talk. Provides slide structure, design templates, timing guidance, and visual validation. Works with PowerPoint and LaTeX Beamer.",
-    "name": "scientific-slides",
-    "slug": "scientific-slides"
-  },
-  {
     "canonical_path": "knowledge/ML/18-multimodal/segment-anything",
     "description": "Foundation model for image segmentation with zero-shot transfer. Use when you need to segment any object in images using points, boxes, or masks as prompts, or automatically generate all object masks in an image.",
     "name": "segment-anything-model",
@@ -474,14 +462,8 @@
     "slug": "skypilot-multi-cloud-orchestration"
   },
   {
-    "canonical_path": "human/slider/archive/v1/slider-ops",
-    "description": "Operate the /slider repo end-to-end: list/create/update/delete slide styles (styles/*.toml), manage per-style layout tables under [layouts.*], scaffold specs (specs/*.md), and render per-slide prompts (prompts/generated/*) using the bundled slider_ops script and/or the slider CLI. Use when a user asks to create/manage styles or layouts, generate prompts from a Markdown SPEC, or otherwise run the slider workflow so Codex should execute commands/edits instead of the user.",
-    "name": "slider-ops",
-    "slug": "slider-ops"
-  },
-  {
     "canonical_path": "human/slider/slider-plan",
-    "description": "Plan the v2 slider workflow end-to-end by selecting which repo skills to run (content-prompts, styled-prompts, styled-artifacts) based on the user\u2019s starting input (materials or existing prompts) and requested output (content prompt, styled prompt, images, PDF, PPTX). Use when a user asks to generate prompts or render/export slide artifacts in a specific format.",
+    "description": "Plan the slider workflow end-to-end by selecting which repo skills to run (content-prompts, styled-prompts, styled-artifacts) based on the user\u2019s starting input (materials or existing prompts) and requested output (content prompt, styled prompt, images, PDF, PPTX). Uses $HUMAN_MATERIAL_PATH/slides/<deck>/ as the working root.",
     "name": "slider-plan",
     "slug": "slider-plan"
   },
@@ -498,12 +480,6 @@
     "slug": "sparse-autoencoder-training"
   },
   {
-    "canonical_path": "human/slider/archive/v1/spec-structurer",
-    "description": "Convert unstructured Markdown material/notes into a structured multi-slide SPEC (specs/*.md) by analyzing headings, bullets, and paragraphs, then dividing content into per-slide sections. Use when asked to 'turn notes into a SPEC', 'split this markdown into slides/pages', 'structure unstructured material into specs/<deck>.md', or 'organize content into per-page slide format'.",
-    "name": "spec-structurer",
-    "slug": "spec-structurer"
-  },
-  {
     "canonical_path": "knowledge/ML/19-emerging-techniques/speculative-decoding",
     "description": "Accelerate LLM inference using speculative decoding, Medusa multiple heads, and lookahead decoding techniques. Use when optimizing inference speed (1.5-3.6\u00d7 speedup), reducing latency for real-time applications, or deploying models with limited compute. Covers draft models, tree-based attention, Jacobi iteration, parallel token generation, and production deployment strategies.",
     "name": "speculative-decoding",
@@ -516,20 +492,14 @@
     "slug": "stable-diffusion-image-generation"
   },
   {
-    "canonical_path": "human/slider/archive/v1/style-evolve",
-    "description": "Evolve a slider style TOML (styles/*.toml) to support missing layouts while keeping the overall style consistent. Use when asked to 'add missing layouts', 'ensure a style supports title_bullets/two_column_bullets/image_*', 'evolve styles/colorful-handdraw.toml to support other layouts', or 'make a style support all layouts from other styles'.",
-    "name": "style-evolve",
-    "slug": "style-evolve"
-  },
-  {
     "canonical_path": "human/slider/styled-artifacts",
-    "description": "Generate slide images and final PDF/PPTX from v2 styled prompts (prompts/styled/*.md), storing intermediates in artifacts/<deck>/work/. Use when the user asks to render/generate/export slides from a Styled PROMPT into images/PDF/PPTX.",
+    "description": "Generate slide images and final PDF/PPTX from v2 styled prompts ($HUMAN_MATERIAL_PATH/slides/<deck>/prompts/styled/<deck>.md), storing intermediates in $HUMAN_MATERIAL_PATH/slides/<deck>/artifacts/<deck>/work/. Use when the user asks to render/generate/export slides from a Styled PROMPT into images/PDF/PPTX.",
     "name": "styled-artifacts",
     "slug": "styled-artifacts"
   },
   {
     "canonical_path": "human/slider/styled-prompts",
-    "description": "Convert per-page Content PROMPTs into design-complete Styled PROMPTs using a Markdown style brief, inferring the best layout per page during creation. Outputs prompts/styled/<deck>.md, ready for image/PDF/PPT generation.",
+    "description": "Convert per-page Content PROMPTs into design-complete Styled PROMPTs using a Markdown style brief, inferring the best layout per page during creation. Outputs $HUMAN_MATERIAL_PATH/slides/<deck>/prompts/styled/<deck>.md, ready for image/PDF/PPT generation.",
     "name": "styled-prompts",
     "slug": "styled-prompts"
   },

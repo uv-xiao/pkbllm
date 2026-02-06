@@ -2,8 +2,7 @@
 
 This is a condensed synthesis of:
 
-- `archieve/v1/.codex/skills/scientific-slides/references/slide_design_principles.md`
-- `archieve/v1/.codex/skills/baoyu-slide-deck/references/design-guidelines.md`
+- an internal archived v1 workflow (removed from this repo)
 
 ## Slide-level principles
 
@@ -23,4 +22,3 @@ This is a condensed synthesis of:
 - Annotate the insight (do not expect the audience to “read the chart”).
 - Highlight the key numbers/series; de-emphasize everything else.
 - Use color consistently (one meaning per color).
-

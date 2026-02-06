@@ -12,5 +12,5 @@ Skills for creating and managing human-facing materials (slides, manuscripts, ex
 <!-- PKBLLM_TABLE_START -->
 | Path | Type | Description |
 | --- | --- | --- |
-| `slider/` | group | (9 skill(s)) |
+| `slider/` | group | (4 skill(s)) |
 <!-- PKBLLM_TABLE_END -->

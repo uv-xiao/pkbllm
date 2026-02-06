@@ -2,9 +2,9 @@
 
 ## Inputs → next skill
 
-- `materials/<deck>/...` or pasted notes → `content-prompts`
-- `prompts/content/<deck>.md` → `styled-prompts`
-- `prompts/styled/<deck>.md` → `styled-artifacts`
+- `$HUMAN_MATERIAL_PATH/slides/<deck>/materials/...` or pasted notes → `content-prompts`
+- `$HUMAN_MATERIAL_PATH/slides/<deck>/prompts/content/<deck>.md` → `styled-prompts`
+- `$HUMAN_MATERIAL_PATH/slides/<deck>/prompts/styled/<deck>.md` → `styled-artifacts`
 
 ## Outputs → stop after
 
@@ -26,4 +26,4 @@ Recommended style precedence:
 
 All intermediates should be kept under:
 
-- `artifacts/<deck>/work/`
+- `$HUMAN_MATERIAL_PATH/slides/<deck>/artifacts/<deck>/work/`

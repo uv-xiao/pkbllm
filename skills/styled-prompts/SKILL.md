@@ -1,13 +1,13 @@
 ---
 name: styled-prompts
-description: "Convert per-page Content PROMPTs into design-complete Styled PROMPTs using a Markdown style brief, inferring the best layout per page during creation. Outputs prompts/styled/<deck>.md, ready for image/PDF/PPT generation."
+description: "Convert per-page Content PROMPTs into design-complete Styled PROMPTs using a Markdown style brief, inferring the best layout per page during creation. Outputs $HUMAN_MATERIAL_PATH/slides/<deck>/prompts/styled/<deck>.md, ready for image/PDF/PPT generation."
 ---
 
 # Styled Prompts (Content PROMPT → Styled PROMPT)
 
 ## Goal
 
-Turn `prompts/content/<deck>.md` into `prompts/styled/<deck>.md` by applying a **style brief** (e.g. `styles/<style>.md`) and making concrete design decisions per page:
+Turn `$HUMAN_MATERIAL_PATH/slides/<deck>/prompts/content/<deck>.md` into `$HUMAN_MATERIAL_PATH/slides/<deck>/prompts/styled/<deck>.md` by applying a **style brief** (e.g. `styles/<style>.md`) and making concrete design decisions per page:
 
 - infer an appropriate layout *during creation* (no fixed layout catalog required)
 - place all content (text, tables, code, figures) so nothing is lost
@@ -16,14 +16,14 @@ Turn `prompts/content/<deck>.md` into `prompts/styled/<deck>.md` by applying a *
 
 ## Inputs
 
-- `prompts/content/<deck>.md`
+- `$HUMAN_MATERIAL_PATH/slides/<deck>/prompts/content/<deck>.md`
 - `styles/<style>.md` (treat the style brief content as the source of truth for visual identity)
 - Optional: additional references under `references/<style>/` (gitignored)
 - Optional: deck preferences under `configs/deck.yaml` (audience/language/style/dimensions)
 
 ## Output
 
-Write to: `prompts/styled/<deck>.md`
+Write to: `$HUMAN_MATERIAL_PATH/slides/<deck>/prompts/styled/<deck>.md`
 
 The output should be compatible with `styled-artifacts`.
 
@@ -118,7 +118,7 @@ For each slide, prefer at least one “visual anchor” when it improves compreh
 
 ## Modification & iteration
 
-Treat `prompts/styled/<deck>.md` as the single source of truth.
+Treat `$HUMAN_MATERIAL_PATH/slides/<deck>/prompts/styled/<deck>.md` as the single source of truth.
 
 - **Edit a slide**: modify the slide block, keep the same slide number, and regenerate that slide with `styled-artifacts --only N`.
 - **Add a slide**: insert a new `## Slide N:` block, then renumber subsequent slides to keep numbering unique and ordered.
@@ -163,7 +163,7 @@ Do not proceed to `styled-artifacts` until the styled prompt passes:
 
 When this skill is triggered:
 
-1. **Do only this step**: produce/update `prompts/styled/<deck>.md`.
+1. **Do only this step**: produce/update `$HUMAN_MATERIAL_PATH/slides/<deck>/prompts/styled/<deck>.md`.
 2. **Do not render anything** here (no images/PDF/PPTX, no render sanity-checks). Rendering belongs to `$styled-artifacts`.
 3. **End your response with recommended next steps** (options + commands to run next).
 
@@ -172,11 +172,8 @@ Recommended next steps (include this block in your response):
 - **Review gate (required before rendering)**: confirm the Styled PROMPT passes the checklist in this skill.
 - **Next (render PDF / image-PPTX)**: run `$styled-artifacts`.
   - PDF + image-PPTX:
-    - `OPENROUTER_API_KEY=... python3 .codex/skills/styled-artifacts/scripts/styled_prompts_to_artifacts.py --prompts prompts/styled/<deck>.md --workdir artifacts/<deck>/work --pdf artifacts/<deck>/<deck>.pdf --pptx artifacts/<deck>/<deck>.pptx`
+    - `OPENROUTER_API_KEY=... python3 skills/styled-artifacts/scripts/styled_prompts_to_artifacts.py --prompts "$HUMAN_MATERIAL_PATH/slides/<deck>/prompts/styled/<deck>.md" --workdir "$HUMAN_MATERIAL_PATH/slides/<deck>/artifacts/<deck>/work" --pdf "$HUMAN_MATERIAL_PATH/slides/<deck>/artifacts/<deck>/<deck>.pdf" --pptx "$HUMAN_MATERIAL_PATH/slides/<deck>/artifacts/<deck>/<deck>.pptx"`
   - Sample / partial regeneration:
     - `... --reuse-workdir --only 1-3`
-- **Next (editable PPTX)**: invoke `$pptx` and follow the full HTML→PPTX workflow.
-  - Minimal dependency commands (local, per-workdir):
-    - `cd artifacts/<deck>/work/pptx-html && npm init -y && npm install pptxgenjs playwright sharp && npx playwright install chromium`
-  - Visual validation:
-    - `python3 .codex/skills/pptx/scripts/thumbnail.py artifacts/<deck>/<deck>.editable.pptx artifacts/<deck>/work/thumbnails --cols 4`
+
+Note: this repo intentionally does not ship an editable-PPTX skill (the upstream `pptx` skill was proprietary).

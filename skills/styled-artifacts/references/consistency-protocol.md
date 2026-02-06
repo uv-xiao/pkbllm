@@ -2,7 +2,7 @@
 
 Condensed from the “formatting consistency protocol” patterns in:
 
-- `archieve/v1/.codex/skills/scientific-slides/SKILL.md`
+- an internal archived v1 workflow (removed from this repo)
 
 ## Deck-level consistency
 
@@ -24,4 +24,3 @@ If a slide references existing figures/screenshots:
 
 - attach the file(s) to the generator
 - describe how to incorporate and annotate them (crop, highlight, labels)
-

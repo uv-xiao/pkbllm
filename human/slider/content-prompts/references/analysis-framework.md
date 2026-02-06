@@ -2,9 +2,9 @@
 
 This is a condensed version of the best parts of:
 
-- `archieve/v1/.codex/skills/baoyu-slide-deck/references/analysis-framework.md`
+- an internal archived v1 workflow (removed from this repo)
 
-Use it before writing `prompts/content/<deck>.md`.
+Use it before writing `$HUMAN_MATERIAL_PATH/slides/<deck>/prompts/content/<deck>.md`.
 
 ## 1) Message hierarchy
 
@@ -48,4 +48,3 @@ Pick a narrative backbone:
 
 - Every source section ends up in exactly one page’s “Must include” (or a TODO if unclear).
 - Split pages that carry multiple intents or competing representations.
-

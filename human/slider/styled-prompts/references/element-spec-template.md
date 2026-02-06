@@ -4,7 +4,7 @@ Use a repeatable inventory so the renderer does not guess.
 
 ## Deck-level style contract (required)
 
-At the very top of `prompts/styled/<deck>.md` (before the first `## Slide N:`), include a short global block describing:
+At the very top of `$HUMAN_MATERIAL_PATH/slides/<deck>/prompts/styled/<deck>.md` (before the first `## Slide N:`), include a short global block describing:
 
 - formatting goal (background treatment, palette roles, typography feel)
 - reusable component language (badges/callouts/arrows/containers)

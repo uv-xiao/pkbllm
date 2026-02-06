@@ -1,6 +1,6 @@
 # Content PROMPT template (v2)
 
-Use this as the canonical structure for `prompts/content/<deck>.md`.
+Use this as the canonical structure for `$HUMAN_MATERIAL_PATH/slides/<deck>/prompts/content/<deck>.md`.
 
 ```markdown
 # Deck: <title>
@@ -34,4 +34,3 @@ Assets:
 Notes / TODO:
 - <missing data, open questions>
 ```
-

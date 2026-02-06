@@ -36,10 +36,9 @@ Merge adjacent pages when:
 
 ## Density checklist (self-review)
 
-For each page in `prompts/content/<deck>.md`:
+For each page in `$HUMAN_MATERIAL_PATH/slides/<deck>/prompts/content/<deck>.md`:
 
 - Title says the takeaway (not a topic label).
 - “Must include” contains all facts/code/images that matter.
 - “Suggested representation” is clear and singular.
 - If there is a table/diagram requirement, the input data is specified (or a TODO is marked).
-

@@ -1,6 +1,6 @@
 ---
 name: content-prompts
-description: "Convert raw material into per-page Content PROMPTs by analyzing content density, intent, and slide usage. Outputs prompts/content/<deck>.md. Use when the user has notes/materials and wants a well-planned per-page content prompt before styling."
+description: "Convert raw material into per-page Content PROMPTs by analyzing content density, intent, and slide usage. Outputs $HUMAN_MATERIAL_PATH/slides/<deck>/prompts/content/<deck>.md. Use when the user has notes/materials and wants a well-planned per-page content prompt before styling."
 ---
 
 # Content Prompts (Material → Content PROMPT)
@@ -17,13 +17,13 @@ Turn raw material (notes, markdown, images, links) into a **per-page Content PRO
 
 ## Inputs
 
-- `materials/<deck>/...` (preferred) or a provided Markdown blob
+- `$HUMAN_MATERIAL_PATH/slides/<deck>/materials/...` (preferred) or a provided Markdown blob
 - Optional constraints: target audience, target slide count, talk type, time limit
 - Optional: deck preferences under `configs/deck.yaml` (audience/language/style/dimensions)
 
 ## Output
 
-Write to: `prompts/content/<deck>.md`
+Write to: `$HUMAN_MATERIAL_PATH/slides/<deck>/prompts/content/<deck>.md`
 
 Format (recommended):
 
@@ -104,7 +104,7 @@ Content PROMPT Progress:
 
 ## Modification & iteration
 
-Treat `prompts/content/<deck>.md` as the single source of truth for planning.
+Treat `$HUMAN_MATERIAL_PATH/slides/<deck>/prompts/content/<deck>.md` as the single source of truth for planning.
 
 - **Edit a page**: update the page’s “Must include” and “Suggested representation”.
 - **Split a page**: duplicate the page section into `Page N` and `Page N (cont.)`, then re-check density and intent.
@@ -115,7 +115,7 @@ Treat `prompts/content/<deck>.md` as the single source of truth for planning.
 
 When this skill is triggered:
 
-1. **Do only this step**: produce/update `prompts/content/<deck>.md`.
+1. **Do only this step**: produce/update `$HUMAN_MATERIAL_PATH/slides/<deck>/prompts/content/<deck>.md`.
 2. **Do not run downstream steps** (no `$styled-prompts`, no `$styled-artifacts`, no rendering sanity-checks) unless the user explicitly requested them in the same message.
 3. **End your response with recommended next steps** (options + commands to run next).
 
@@ -127,6 +127,6 @@ Recommended next steps (include this block in your response):
     - Use `configs/deck.yaml` (`style:`) if present
     - Or pick a preset: `styles/blueprint.md`, `styles/chalkboard.md`, `styles/sketch-notes.md`, ...
   - Recommended invocation:
-    - `$styled-prompts convert prompts/content/<deck>.md + styles/<style>.md into prompts/styled/<deck>.md.`
+    - `$styled-prompts convert "$HUMAN_MATERIAL_PATH/slides/<deck>/prompts/content/<deck>.md" + styles/<style>.md into "$HUMAN_MATERIAL_PATH/slides/<deck>/prompts/styled/<deck>.md".`
 
 If the user requested only a **sample** (e.g. 4 pages), recommend validating the sample first, then rerunning this skill for full coverage.
