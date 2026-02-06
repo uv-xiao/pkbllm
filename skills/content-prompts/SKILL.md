@@ -19,7 +19,7 @@ Turn raw material (notes, markdown, images, links) into a **per-page Content PRO
 
 - `$HUMAN_MATERIAL_PATH/slides/<deck>/materials/...` (preferred) or a provided Markdown blob
 - Optional constraints: target audience, target slide count, talk type, time limit
-- Optional: deck preferences under `configs/deck.yaml` (audience/language/style/dimensions)
+- Optional: deck preferences under `$HUMAN_MATERIAL_PATH/slides/<deck>/configs/deck.yaml` (audience/language/style/dimensions)
 
 ## Output
 
@@ -124,9 +124,9 @@ Recommended next steps (include this block in your response):
 - **Review gate (required before styling)**: confirm the Content PROMPT passes the checklist in this skill.
 - **Next (create Styled PROMPT)**: run `$styled-prompts` on the generated file.
   - Style selection options:
-    - Use `configs/deck.yaml` (`style:`) if present
-    - Or pick a preset: `styles/blueprint.md`, `styles/chalkboard.md`, `styles/sketch-notes.md`, ...
+    - Use `$HUMAN_MATERIAL_PATH/slides/<deck>/configs/deck.yaml` (`style:`) if present
+    - Or pick a preset: `$HUMAN_MATERIAL_PATH/slides/styles/blueprint.md`, `$HUMAN_MATERIAL_PATH/slides/styles/chalkboard.md`, `$HUMAN_MATERIAL_PATH/slides/styles/sketch-notes.md`, ...
   - Recommended invocation:
-    - `$styled-prompts convert "$HUMAN_MATERIAL_PATH/slides/<deck>/prompts/content/<deck>.md" + styles/<style>.md into "$HUMAN_MATERIAL_PATH/slides/<deck>/prompts/styled/<deck>.md".`
+    - `$styled-prompts convert "$HUMAN_MATERIAL_PATH/slides/<deck>/prompts/content/<deck>.md" + "$HUMAN_MATERIAL_PATH/slides/styles/<style>.md" into "$HUMAN_MATERIAL_PATH/slides/<deck>/prompts/styled/<deck>.md".`
 
 If the user requested only a **sample** (e.g. 4 pages), recommend validating the sample first, then rerunning this skill for full coverage.

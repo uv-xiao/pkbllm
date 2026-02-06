@@ -213,10 +213,11 @@ def main(argv: Optional[list[str]] = None) -> int:
     p.add_argument("--no-download", action="store_true", help="Disable downloading http(s) image URLs")
     args = p.parse_args(argv)
 
-    prompts_path = Path(args.prompts)
+    prompts_path = Path(args.prompts).expanduser()
     if not prompts_path.exists():
         print(f"Prompts file not found: {prompts_path}", file=sys.stderr)
         return 2
+    prompts_path = prompts_path.resolve()
 
     base_workdir = Path(args.workdir)
     selected: Optional[set[int]] = None
@@ -239,20 +240,36 @@ def main(argv: Optional[list[str]] = None) -> int:
     raster_dir = workdir / "rasterized"
     slides_dir.mkdir(parents=True, exist_ok=True)
 
-    # Prefer resolving the repo root from this script's location so the tool
-    # works even when --prompts points outside the repo (e.g. /tmp during tests).
-    repo_root = _find_repo_root(Path(__file__).resolve().parent)
+    # Prefer the prompts repo root (HUMAN_MATERIAL_PATH repo) when available,
+    # so relative asset paths resolve naturally (e.g. materials/, styles/).
+    script_repo_root = _find_repo_root(Path(__file__).resolve().parent)
+    prompts_repo_root = _find_repo_root(prompts_path.parent)
+    repo_root = prompts_repo_root if (prompts_repo_root / ".git").exists() else script_repo_root
+
+    def _load_openrouter_key(root: Path) -> Optional[str]:
+        key_path = root / ".OPENROUTER_API_KEY"
+        if not key_path.exists():
+            return None
+        try:
+            raw = key_path.read_text(encoding="utf-8").strip()
+        except Exception:
+            return None
+        if not raw:
+            return None
+        if "OPENROUTER_API_KEY=" in raw:
+            for line in raw.splitlines():
+                line = line.strip()
+                if not line or line.startswith("#"):
+                    continue
+                if line.startswith("OPENROUTER_API_KEY="):
+                    value = line.split("=", 1)[1].strip()
+                    return value or None
+            return None
+        return raw
 
     # Allow key stored in repo root for local runs.
     if not args.api_key:
-        key_path = repo_root / ".OPENROUTER_API_KEY"
-        if key_path.exists():
-            try:
-                key = key_path.read_text(encoding="utf-8").strip()
-                if key:
-                    args.api_key = key
-            except Exception:
-                pass
+        args.api_key = _load_openrouter_key(repo_root) or _load_openrouter_key(script_repo_root)
 
     global_context, slides = parse_styled_prompts(prompts_path.read_text(encoding="utf-8"))
     if not slides:

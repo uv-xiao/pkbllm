@@ -14,13 +14,13 @@
 
 ## Style files
 
-Preset style briefs live in `styles/*.md` (example: `styles/blueprint.md`).
+Preset style briefs live in `$HUMAN_MATERIAL_PATH/slides/styles/*.md` (example: `$HUMAN_MATERIAL_PATH/slides/styles/blueprint.md`).
 
 Recommended style precedence:
 
-1. Explicit user request (e.g. “use blueprint” → `styles/blueprint.md`)
-2. `configs/deck.yaml` (`style:`)
-3. Default to `styles/blueprint.md`
+1. Explicit user request (e.g. “use blueprint” → `$HUMAN_MATERIAL_PATH/slides/styles/blueprint.md`)
+2. `$HUMAN_MATERIAL_PATH/slides/<deck>/configs/deck.yaml` (`style:`)
+3. Default to `$HUMAN_MATERIAL_PATH/slides/styles/blueprint.md`
 
 ## Workdirs
 

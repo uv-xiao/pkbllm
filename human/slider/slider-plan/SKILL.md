@@ -32,9 +32,9 @@ Decide the stopping point from the requested output:
 
 ## Style selection (v2)
 
-- If the user names a style, use `styles/<style>.md`.
-- Otherwise, use `configs/deck.yaml` (`style:`) if present.
-- If neither is available, default to `styles/blueprint.md` (or ask 1 question if the choice matters).
+- If the user names a style, use `$HUMAN_MATERIAL_PATH/slides/styles/<style>.md`.
+- Otherwise, use `$HUMAN_MATERIAL_PATH/slides/<deck>/configs/deck.yaml` (`style:`) if present.
+- If neither is available, default to `$HUMAN_MATERIAL_PATH/slides/styles/blueprint.md` (or ask 1 question if the choice matters).
 
 ## Review policy (required)
 

@@ -2,7 +2,7 @@
 
 This schema is ported from archived v1 to standardize v2 deck preferences.
 
-Recommended v2 location: `configs/deck.yaml`
+Recommended v2 location: `$HUMAN_MATERIAL_PATH/slides/<deck>/configs/deck.yaml`
 
 ## Full Schema
 
@@ -68,7 +68,7 @@ custom_styles:
     description: "Optional description"
 ```
 
-Then use with v2 by setting `style: style-name` in `configs/deck.yaml`. For reproducibility, also keep a matching style brief in `styles/style-name.md`.
+Then use with v2 by setting `style: style-name` in `$HUMAN_MATERIAL_PATH/slides/<deck>/configs/deck.yaml`. For reproducibility, also keep a matching style brief in `$HUMAN_MATERIAL_PATH/slides/styles/style-name.md`.
 
 ## Minimal Examples
 
@@ -78,7 +78,7 @@ Then use with v2 by setting `style: style-name` in `configs/deck.yaml`. For repr
 style: sketch-notes
 ```
 
-This corresponds to a style brief at `styles/sketch-notes.md`.
+This corresponds to a style brief at `$HUMAN_MATERIAL_PATH/slides/styles/sketch-notes.md`.
 
 ### Prefer no reviews
 
@@ -111,4 +111,4 @@ custom_styles:
 
 ## Location
 
-Recommended v2 location: `configs/deck.yaml` (project).
+Recommended v2 location: `$HUMAN_MATERIAL_PATH/slides/<deck>/configs/deck.yaml`.

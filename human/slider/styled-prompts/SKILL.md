@@ -17,9 +17,9 @@ Turn `$HUMAN_MATERIAL_PATH/slides/<deck>/prompts/content/<deck>.md` into `$HUMAN
 ## Inputs
 
 - `$HUMAN_MATERIAL_PATH/slides/<deck>/prompts/content/<deck>.md`
-- `styles/<style>.md` (treat the style brief content as the source of truth for visual identity)
+- `$HUMAN_MATERIAL_PATH/slides/styles/<style>.md` (treat the style brief content as the source of truth for visual identity)
 - Optional: additional references under `references/<style>/` (gitignored)
-- Optional: deck preferences under `configs/deck.yaml` (audience/language/style/dimensions)
+- Optional: deck preferences under `$HUMAN_MATERIAL_PATH/slides/<deck>/configs/deck.yaml` (audience/language/style/dimensions)
 
 ## Output
 
@@ -87,7 +87,7 @@ V2 supports a “dimension” vocabulary (ported from archived v1) to describe s
 - `references/dimensions/typography.md`
 - `references/dimensions/density.md`
 
-Preset style briefs live in `styles/*.md` (e.g. `styles/blueprint.md`).
+Preset style briefs live in `$HUMAN_MATERIAL_PATH/slides/styles/*.md` (e.g. `$HUMAN_MATERIAL_PATH/slides/styles/blueprint.md`).
 
 Config schema reference (optional):
 
@@ -97,8 +97,8 @@ Config schema reference (optional):
 
 When both exist:
 
-1. Per-deck: `configs/deck.yaml` (audience/language/style/dimensions)
-2. Style file: `styles/<style>.md` (palette/typography/shape language rules; optional Dimensions section)
+1. Per-deck: `$HUMAN_MATERIAL_PATH/slides/<deck>/configs/deck.yaml` (audience/language/style/dimensions)
+2. Style file: `$HUMAN_MATERIAL_PATH/slides/styles/<style>.md` (palette/typography/shape language rules; optional Dimensions section)
 3. Defaults: conservative, readable, balanced density
 
 ## Adding vivid/intuitive visuals (icons, illustrations, tables)

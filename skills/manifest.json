@@ -180,6 +180,12 @@
     "slug": "implementing-llms-litgpt"
   },
   {
+    "canonical_path": "human/init-human-material-repo",
+    "description": "Initialize a dedicated HUMAN_MATERIAL_PATH git repository for generated human-facing materials. Use when a user asks to set up a new materials repo/folder for slides/manuscripts/exercises, create the expected file structure under $HUMAN_MATERIAL_PATH, and create a local-only .OPENROUTER_API_KEY file for slider rendering.",
+    "name": "init-human-material-repo",
+    "slug": "init-human-material-repo"
+  },
+  {
     "canonical_path": "knowledge/ML/16-prompt-engineering/instructor",
     "description": "Extract structured data from LLM responses with Pydantic validation, retry failed extractions automatically, parse complex JSON with type safety, and stream partial results with Instructor - battle-tested structured output library",
     "name": "instructor",
