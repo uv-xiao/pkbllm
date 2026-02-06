@@ -140,6 +140,8 @@ def build_skills_mirror(
                     file=sys.stderr,
                 )
                 continue
+            if not name.startswith("uv-"):
+                raise SystemExit(f"Skill name must start with 'uv-': {name!r} ({skill_md})")
             slug = _skill_slug(name)
             if slug in seen_slugs:
                 raise SystemExit(
