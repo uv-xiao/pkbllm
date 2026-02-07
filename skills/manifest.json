@@ -66,6 +66,12 @@
     "slug": "uv-content-prompts"
   },
   {
+    "canonical_path": "human/exercises/create-paper-exercises",
+    "description": "Create learning exercises from a research paper (arXiv URL/PDF). Use when turning a paper into (1) a programming exercise (extract the core technique into a coding problem with tests) and (2) a modeling exercise (extract formulas/reasoning into calculation problems with worked solutions). Generates an exercise pack under $HUMAN_MATERIAL_PATH/exercises/<paper_slug>/ including local mini-skills to check answers and reveal golden solutions.",
+    "name": "uv-create-paper-exercises",
+    "slug": "uv-create-paper-exercises"
+  },
+  {
     "canonical_path": "knowledge/ML/14-agents/crewai",
     "description": "Multi-agent orchestration framework for autonomous AI collaboration. Use when building teams of specialized agents working together on complex tasks, when you need role-based agent collaboration with memory, or for production workflows requiring sequential/hierarchical execution. Built without LangChain dependencies for lean, fast execution.",
     "name": "uv-crewai-multi-agent",
@@ -220,6 +226,12 @@
     "description": "LLM observability platform for tracing, evaluation, and monitoring. Use when debugging LLM applications, evaluating model outputs against datasets, monitoring production systems, or building systematic testing pipelines for AI applications.",
     "name": "uv-langsmith-observability",
     "slug": "uv-langsmith-observability"
+  },
+  {
+    "canonical_path": "human/scientific/literature-review",
+    "description": "Conduct comprehensive literature reviews (systematic/narrative/scoping) across multiple databases, synthesize findings, and produce a well-cited review document. Use when planning and writing literature reviews or state-of-the-art surveys; prefer outputs under $HUMAN_MATERIAL_PATH/research/<topic>/.",
+    "name": "uv-literature-review",
+    "slug": "uv-literature-review"
   },
   {
     "canonical_path": "knowledge/ML/12-inference-serving/llama-cpp",
@@ -414,6 +426,12 @@
     "slug": "uv-ray-train"
   },
   {
+    "canonical_path": "human/read-arxiv-paper",
+    "description": "Download and deeply read an arXiv paper (given an arXiv URL or id), then write a clear human-facing report with strong storytelling and logical reasoning. Use when asked to summarize/review an arXiv paper, extract key ideas, connect them to practice, and produce a report under $HUMAN_MATERIAL_PATH/research/<paper_slug>/report.md. Stores downloads under $HUMAN_MATERIAL_PATH/.references/ (configurable via $HUMAN_MATERIAL_PATH/.agents/config.toml or ~/.agents/config.toml).",
+    "name": "uv-read-arxiv-paper",
+    "slug": "uv-read-arxiv-paper"
+  },
+  {
     "canonical_path": "productivity/receiving-code-review",
     "description": "Use when receiving code review feedback, before implementing suggestions, especially if feedback seems unclear or technically questionable - requires technical rigor and verification, not performative agreement or blind implementation",
     "name": "uv-receiving-code-review",
@@ -430,6 +448,18 @@
     "description": "RNN+Transformer hybrid with O(n) inference. Linear time, infinite context, no KV cache. Train like GPT (parallel), infer like RNN (sequential). Linux Foundation AI project. Production at Windows, Office, NeMo. RWKV-7 (March 2025). Models up to 14B parameters.",
     "name": "uv-rwkv-architecture",
     "slug": "uv-rwkv-architecture"
+  },
+  {
+    "canonical_path": "human/scientific/scientific-schematics",
+    "description": "Create publication-quality scientific diagrams via OpenRouter image models with smart iterative refinement and automated quality review. Use when generating figures for papers/reports/slides (architectures, system diagrams, flowcharts, pathways). Prefer saving outputs under $HUMAN_MATERIAL_PATH/research/<topic>/figures/.",
+    "name": "uv-scientific-schematics",
+    "slug": "uv-scientific-schematics"
+  },
+  {
+    "canonical_path": "human/scientific/scientific-writing",
+    "description": "Write and revise scientific manuscripts in full paragraphs (not bullet points), using a two-stage workflow (outline \u2192 prose). Use when drafting IMRAD sections, applying reporting guidelines (CONSORT/STROBE/PRISMA), formatting citations (APA/AMA/Vancouver), and producing publishable writing in the HUMAN materials repo (usually under $HUMAN_MATERIAL_PATH/manuscripts/ or $HUMAN_MATERIAL_PATH/research/).",
+    "name": "uv-scientific-writing",
+    "slug": "uv-scientific-writing"
   },
   {
     "canonical_path": "knowledge/ML/18-multimodal/segment-anything",
