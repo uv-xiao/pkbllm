@@ -1,20 +1,43 @@
-# pkbllm — Personal Knowledge Base for LLM Work
+# pkbllm — Personal Knowledge Base for better LLM–Human interaction
 
-`pkbllm` is a structured collection of **agent skills** (reusable instruction sets) plus
-lightweight **knowledge organization** to help:
+`pkbllm` is a curated repository of **agent skills** (reusable instruction sets) and a lightweight
+**knowledge organization** scheme designed to improve LLM–human interaction:
 
-- Humans stay effective as LLM tooling evolves
-- Coding/research agents work more reliably (planning, testing, reviews, execution)
+- Humans use LLMs more effectively by invoking the right skill at the right time.
+- LLMs keep human-facing artifacts organized so you can iterate without losing context.
 
-This repo is designed to be installable with the Skills CLI (`npx skills`) while still
-keeping a maintainable, curated internal structure.
+This repo is compatible with the Skills CLI (`npx skills`) and maintains a clean separation between
+canonical skill sources and the generated distribution mirror.
 
-## What’s included
+## What this enables
 
-- **Productivity skills** for engineering workflows (imported from `obra/superpowers`)
-- **ML / research skills** (imported from `Orchestra-Research/AI-research-SKILLs`)
-- **Human-material skills** for slides and artifacts (imported from `uv-xiao/slider`)
-- A **generated `skills/` mirror** compatible with `npx skills`
+**For humans**
+- A repeatable workflow for generating and maintaining materials (slides, paper notes, exercises).
+- A stable place (`$HUMAN_MATERIAL_PATH`) where outputs live, independent of the pkb repo checkout.
+
+**For LLM agents**
+- A reliable “operating system” of skills (`uv-*`) covering planning, execution, review, research,
+  and human-facing production.
+- Conventions for where to put outputs and where to put bulky downloads/clones.
+
+## Visual overview
+
+```mermaid
+flowchart LR
+  KB["Knowledge base (pkbllm)<br/>skills + conventions + notes"] -->|"invoke the right skill"| AG["LLM agent"]
+  AG -->|"generate learning artifacts"| OUT["$HUMAN_MATERIAL_PATH/research/<topic>/<br/>report + figures + notes"]
+  AG -->|"generate practice"| EX["$HUMAN_MATERIAL_PATH/exercises/<topic>/<br/>programming + modeling"]
+  AG -->|"cache sources (gitignored)"| REF["$HUMAN_MATERIAL_PATH/.references/<br/>pdfs/ arxiv/ repos/"]
+
+  OUT -->|"read & internalize"| H["Human"]
+  EX -->|"practice & check answers"| H
+
+  H -->|"better prompts + constraints"| AG
+  H -->|"apply in project/research"| WORK["Project / research work"]
+
+  WORK -->|"new questions + new sources"| AG
+  AG -->|"extract & codify improvements"| KB
+```
 
 ## Quickstart
 
@@ -24,7 +47,7 @@ List available skills:
 npx skills add . --list
 ```
 
-Install everything to Codex (project scope):
+Install all skills to Codex (project scope):
 
 ```bash
 npx skills add . -a codex --skill '*' -y
@@ -32,45 +55,51 @@ npx skills add . -a codex --skill '*' -y
 
 See `INSTALL.md` for more install options and environment variables.
 
-## Repo layout
+## How to use this repo (recommended workflow)
 
-Canonical (curated) skill locations:
+1) Start a session by using `uv-using-pkb` to discover the right skill(s).
 
-- `productivity/` — day-to-day engineering skills
+2) If you generate human-facing artifacts, initialize a dedicated materials repo once:
+- Use `uv-init-human-material-repo` to create `$HUMAN_MATERIAL_PATH` with expected structure.
+
+3) Keep outputs organized:
+- Tracked outputs: `$HUMAN_MATERIAL_PATH/{slides,research,manuscripts,exercises}/...`
+- Downloads/clones (gitignored): `$HUMAN_MATERIAL_PATH/.references/{pdfs,arxiv,repos}/...`
+
+4) Adjust paths if needed:
+- Repo override: `$HUMAN_MATERIAL_PATH/.agents/config.toml`
+- User default: `~/.agents/config.toml`
+
+## Repo layout (canonical vs generated)
+
+Canonical (curated) skill sources:
+
+- `common/` — shared cross-domain skills (e.g. “how to use pkb”)
+- `productivity/` — engineering workflow skills
 - `knowledge/` — domain and research skills
 - `human/` — skills for generating human-facing materials
 - `bootstrap/` — scripts to maintain this repo
 
-Distribution surface for the Skills CLI:
+Generated distribution mirror:
 
-- `skills/` — generated mirror of all skills (direct children are skills)
+- `skills/` — generated mirror of all skills for `npx skills` consumers (do not edit)
 
-Reference repositories (optional, not committed):
+Reference clones (optional, local only):
 
-- `.references/` — local clones used for one-time bootstrapping (skills evolve in this repo after import)
+- `.references/` — one-time upstream clones used for importing; skills evolve in this repo afterward
 
-## Maintaining the `skills/` mirror
+## Maintaining the `skills/` mirror (contributors)
 
-Canonical skills live under `knowledge/`, `productivity/`, `human/`, and `bootstrap/`.
-
-The top-level `skills/` directory is a generated mirror intended for `npx skills`. After adding or
-editing canonical skills, regenerate the mirror and refresh README indexes:
+After adding/editing canonical skills, regenerate the mirror and refresh README indexes:
 
 ```bash
 python bootstrap/scripts/update_skills_mirror.py all
 ```
 
-## References
-
-- `obra/superpowers` — productive engineering workflow skills
-- `Orchestra-Research/AI-research-SKILLs` — ML/research tool skills
-- `uv-xiao/slider` — slide/artifact generation skills
-- `vercel-labs/skills` — Skills CLI ecosystem conventions
-
 ## License
 
-- Repository license: see `LICENSE`
-- Third-party notices: see `THIRD_PARTY_NOTICES.md`
+- Repository license: `LICENSE`
+- Third-party notices: `THIRD_PARTY_NOTICES.md`
 
 ## <TABLE>
 <!-- PKBLLM_TABLE_START -->
