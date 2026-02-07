@@ -76,6 +76,7 @@ python bootstrap/scripts/update_skills_mirror.py all
 <!-- PKBLLM_TABLE_START -->
 | Path | Type | Description |
 | --- | --- | --- |
+| `common/` | dir | Shared cross-domain skills |
 | `knowledge/` | dir | Domain and research skills |
 | `productivity/` | dir | Engineering workflow skills |
 | `human/` | dir | Skills for human-facing materials |

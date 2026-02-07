@@ -200,6 +200,7 @@ def _readme_table_for_dir(dir_path: Path) -> str:
 
     if dir_path == ROOT:
         candidates = [
+            ("common/", "dir", "Shared cross-domain skills"),
             ("knowledge/", "dir", "Domain and research skills"),
             ("productivity/", "dir", "Engineering workflow skills"),
             ("human/", "dir", "Skills for human-facing materials"),
@@ -329,6 +330,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     args = parser.parse_args(argv)
 
     canonical_roots = [
+        ROOT / "common",
         ROOT / "knowledge",
         ROOT / "productivity",
         ROOT / "human",

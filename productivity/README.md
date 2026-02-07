@@ -12,7 +12,6 @@ Skills for day-to-day engineering work with coding agents (planning, reviews, te
 <!-- PKBLLM_TABLE_START -->
 | Path | Type | Description |
 | --- | --- | --- |
-| `@common/` | group | (1 skill(s)) |
 | `brainstorming/` | skill | You MUST use this before any creative work - creating features, building components, adding functionality, or modifying behavior. Explores user intent, requirements and design before implementation. |
 | `dispatching-parallel-agents/` | skill | Use when facing 2+ independent tasks that can be worked on without shared state or sequential dependencies |
 | `executing-plans/` | skill | Use when you have a written implementation plan to execute in a separate session with review checkpoints |
