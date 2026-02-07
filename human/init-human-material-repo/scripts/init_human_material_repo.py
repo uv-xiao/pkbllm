@@ -177,7 +177,7 @@ Suggested layout:
     _write_text(root / ".agents" / "config.toml", _default_config_toml(), overwrite=overwrite)
 
     # Top-level folders
-    for d in ["slides", "manuscripts", "exercises"]:
+    for d in ["slides", "research", "manuscripts", "exercises"]:
         (root / d).mkdir(parents=True, exist_ok=True)
 
     # Slides structure

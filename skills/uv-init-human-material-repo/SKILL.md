@@ -33,7 +33,7 @@ HUMAN_MATERIAL_PATH=/abs/path/to/human-materials python human/init-human-materia
     - `slides/<deck>/configs/deck.yaml`
     - `slides/<deck>/prompts/{content,styled}/`
     - `slides/<deck>/artifacts/<deck>/...`
-- `manuscripts/`, `exercises/`
+- `research/`, `manuscripts/`, `exercises/`
 - `.OPENROUTER_API_KEY` (created but gitignored)
 - `.OPENROUTER_API_KEY.example` (tracked)
 - `.gitignore` with safe defaults (secrets + bulky intermediates)
