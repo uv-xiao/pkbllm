@@ -606,6 +606,12 @@
     "slug": "uv-using-git-worktrees"
   },
   {
+    "canonical_path": "productivity/@common/using-pkb",
+    "description": "Use pkbllm skills effectively. Use at the start of a session when working from a pkbllm repo checkout: discover which `uv-*` skill to invoke, understand the canonical-vs-generated layout (don\u2019t edit `skills/`), install/list skills via Skills-CLI, and follow HUMAN_MATERIAL_PATH conventions (slides/research/exercises plus .references/ downloads with config.toml overrides).",
+    "name": "uv-using-pkb",
+    "slug": "uv-using-pkb"
+  },
+  {
     "canonical_path": "productivity/using-superpowers",
     "description": "Use when starting any conversation - establishes how to find and use skills, requiring Skill tool invocation before ANY response including clarifying questions",
     "name": "uv-using-superpowers",
