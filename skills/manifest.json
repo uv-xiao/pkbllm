@@ -6,6 +6,12 @@
     "slug": "uv-bootstrap-ml-knowledge-authoring"
   },
   {
+    "canonical_path": "bootstrap/skill-linking",
+    "description": "Maintain relationships between pkbllm skills so workflows compose cleanly. Use when adding a new skill or changing workflows and you want to (1) decide which skills should be co-invoked, (2) update SKILL.md trigger descriptions and Integration sections, and (3) keep the generated mirror/manifest and README <TABLE> indexes consistent.",
+    "name": "uv-bootstrap-skill-linking",
+    "slug": "uv-bootstrap-skill-linking"
+  },
+  {
     "canonical_path": "bootstrap/skill-maintenance",
     "description": "Maintain and curate the pkbllm skills repository. Use when adding/importing a new skill, merging skills from external repos, updating or refactoring existing skills, regenerating the generated `skills/` mirror, or ensuring licensing/compliance and naming conventions (all skills must start with `uv-`).",
     "name": "uv-bootstrap-skill-maintenance",
@@ -148,6 +154,12 @@
     "description": "Use when completing tasks, implementing major features, or before merging to verify work meets requirements",
     "name": "uv-requesting-code-review",
     "slug": "uv-requesting-code-review"
+  },
+  {
+    "canonical_path": "productivity/research-project-docs",
+    "description": "Create and maintain the research-project documentation structure (analysis/features/implementation/progress/workloads/spec/evaluation + feats/ impls/ evals/). Use when starting a new research repo, evolving a framework during design/development/evaluation, or when adding/changing features so docs/spec/eval stay synchronized with implementation.",
+    "name": "uv-research-project-docs",
+    "slug": "uv-research-project-docs"
   },
   {
     "canonical_path": "knowledge/ML/model-architecture/rwkv",

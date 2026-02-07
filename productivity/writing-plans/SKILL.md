@@ -108,4 +108,6 @@ git commit -m "feat: add specific feature"
 
 After writing `task_plan.md`, proceed by invoking `uv-executing-plans` in the **current session** (default).
 
+If the work is a research/framework repo where documentation must evolve with features, also initialize and maintain the docs structure using `uv-research-project-docs` and include explicit “sync docs” steps after feature-completing tasks.
+
 Only use git worktrees if the user explicitly requests worktree/isolation. If a worktree is used and the work completes, follow `uv-finishing-a-development-branch`.
