@@ -9,9 +9,9 @@ description: "Create and curate new ML domain knowledge skills in this repo. Use
 
 Add a new ML knowledge skill under `knowledge/ML/` that matches this repo’s conventions and stays high-signal.
 
-## Before you write anything
+## Curated ML taxonomy (fixed)
 
-1) **Pick the category** (keep the taxonomy small):
+Put new ML skills under exactly one of these categories:
 
 - `model-architecture/`
 - `training/` (post-training)
@@ -21,19 +21,53 @@ Add a new ML knowledge skill under `knowledge/ML/` that matches this repo’s co
 - `kernel/` (to fill)
 - `agents/` (to fill)
 
-2) **Study existing exemplars** in the target category (copy structure, not content):
+If it doesn’t fit, don’t add it. Extend taxonomy only with explicit repo-level intent.
 
-- Open 1–2 existing skills under `knowledge/ML/<category>/.../SKILL.md`
-- Note their:
-  - “When to use” phrasing
-  - Quick-start commands
-  - Common pitfalls / troubleshooting
-  - Any required configuration patterns
+## House style (baked-in)
 
-3) **Decide what “valuable” means** (avoid adding duplicates):
+This repo’s ML skills follow a consistent structure. Do not “study exemplars at runtime”; instead, apply these rules:
 
-- Include the skill only if it adds new capabilities, better workflow, or a clearer mental model than what already exists.
-- If it overlaps heavily, prefer **updating the existing skill** instead of adding a new one.
+### 1) Frontmatter schema
+
+All ML skills must have `name:` starting with `uv-`. Prefer this full schema (extra fields are allowed):
+
+```yaml
+---
+name: uv-<skill-slug>
+description: "<what it is>. Use when <trigger phrases and contexts>."
+license: MIT
+tags: [Short, Tags, Here]
+dependencies: [optional, list, of, python, packages]
+---
+```
+
+Notes:
+- `license:` is optional but recommended (most ML skills here are MIT-derived).
+- Keep `description:` focused on **when to use** triggers; the body is loaded later.
+
+### 2) Minimum viable sections (copy/paste template)
+
+Use these headings in `SKILL.md`:
+
+1. `## Quick start` — the shortest command/code snippet that works
+2. `## When to use` — 5–12 bullets of trigger phrases
+3. `## Core concepts` — 1–2 screens; define key terms precisely
+4. `## Workflows` — common tasks as checklists
+5. `## Pitfalls` — failure modes + debugging checks
+6. `## References` — primary docs/papers/repos (prefer authoritative)
+
+### 3) High-signal rubric (avoid doc dumps)
+
+Include a new skill only if it meaningfully improves at least one of:
+- **Workflow**: a repeatable procedure with decision points and commands
+- **Debuggability**: concrete failure modes + how to diagnose
+- **Implementation**: minimal runnable snippets + integration points
+- **Comparative clarity**: when to choose this over alternatives
+
+Avoid:
+- Pasting entire upstream docs (low signal, hard to maintain)
+- Vague “overview only” skills with no commands/checklists
+- Duplicating an existing skill’s scope (prefer updating it)
 
 ## Scaffold a new skill folder
 
@@ -52,19 +86,51 @@ The script:
 - Writes `SKILL.md` with `uv-*` naming
 - Optionally creates `references/`, `scripts/`, `assets/`
 
-## Write the skill (minimum viable content)
+## Category-specific guidance (distilled)
 
-In `SKILL.md`:
+### `model-architecture/`
 
-- Frontmatter:
-  - `name:` must start with `uv-`
-  - `description:` should include **when to use** triggers
-- Body sections (recommended):
-  - Quick start (commands, minimal example)
-  - Concepts (1–2 screens)
-  - Common workflows (bullet lists are fine)
-  - Pitfalls / debugging checklist
-  - References (links to primary docs/papers)
+Focus on:
+- the **one core idea** (e.g., state-space recurrence, routing, draft/verify)
+- minimal pseudocode or algorithm sketch
+- what changes at inference time (KV cache? batching? memory shape?)
+
+### `training/` (post-training)
+
+Focus on:
+- objective + data requirements
+- training loop topology (actors/critics/rollouts, preference pairs, etc.)
+- scaling knobs and common instabilities
+
+### `distributed/`
+
+Focus on:
+- parallelism axes (DP/TP/PP/CP/EP) and what each breaks
+- sharding/checkpointing patterns
+- “first failure” debugging (NCCL hangs, OOMs, divergence)
+
+### `serving/`
+
+Focus on:
+- request lifecycle (prefill vs decode), batching, cache semantics
+- deployment shapes (single node vs multi node), observability hooks
+- latency/throughput tradeoffs and failure modes
+
+### `paper/`
+
+Focus on:
+- reproducible writing workflow and citation correctness
+- camera-ready checklists, positioning, and common reviewer objections
+
+### `kernel/` and `agents/` (to fill)
+
+Start with:
+- a minimal workflow + tooling (profilers, tracing, reproduction harness)
+- a small glossary + “where to look in code”
+
+## References (kept in this skill)
+
+Read `bootstrap/ml-knowledge-authoring/references/ml-skill-style-guide.md` for a short, copy-ready template and checklists.
 
 ## Keep the repo consistent
 
@@ -83,4 +149,3 @@ npx -y skills add . --list
 3) Licensing:
 
 - If you imported/adapted material from a third-party repo, ensure it’s distributable and update `THIRD_PARTY_NOTICES.md`.
-
