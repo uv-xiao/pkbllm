@@ -49,12 +49,12 @@
   },
   {
     "canonical_path": "productivity/executing-plans",
-    "description": "Use when you have a written implementation plan to execute in a separate session with review checkpoints",
+    "description": "Use when you have a written implementation plan (task_plan.md) and need to execute it in the current session with persistent file-based progress tracking",
     "name": "uv-executing-plans",
     "slug": "uv-executing-plans"
   },
   {
-    "canonical_path": "productivity/find-skills",
+    "canonical_path": "bootstrap/find-skills",
     "description": "Helps users discover and install agent skills when they ask questions like \"how do I do X\", \"find a skill for X\", \"is there a skill that can...\", or express interest in extending capabilities. This skill should be used when the user is looking for functionality that might exist as an installable skill.",
     "name": "uv-find-skills",
     "slug": "uv-find-skills"
@@ -211,7 +211,7 @@
   },
   {
     "canonical_path": "productivity/subagent-driven-development",
-    "description": "Use when executing implementation plans with independent tasks in the current session",
+    "description": "Use when executing an implementation plan in a git worktree/feature branch and you explicitly want subagent-per-task execution with review gates",
     "name": "uv-subagent-driven-development",
     "slug": "uv-subagent-driven-development"
   },
@@ -235,7 +235,7 @@
   },
   {
     "canonical_path": "productivity/using-git-worktrees",
-    "description": "Use when starting feature work that needs isolation from current workspace or before executing implementation plans - creates isolated git worktrees with smart directory selection and safety verification",
+    "description": "Use only when the user explicitly requests worktree/isolation for feature work. Creates isolated git worktrees with smart directory selection and safety verification.",
     "name": "uv-using-git-worktrees",
     "slug": "uv-using-git-worktrees"
   },
@@ -247,7 +247,7 @@
   },
   {
     "canonical_path": "productivity/using-superpowers",
-    "description": "Use when starting any conversation - establishes how to find and use skills, requiring Skill tool invocation before ANY response including clarifying questions",
+    "description": "Use when starting any conversation or task to establish how to find and apply relevant `uv-*` skills early (without platform-specific assumptions).",
     "name": "uv-using-superpowers",
     "slug": "uv-using-superpowers"
   },

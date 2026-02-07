@@ -1,53 +1,66 @@
 ---
 name: uv-executing-plans
-description: Use when you have a written implementation plan to execute in a separate session with review checkpoints
+description: Use when you have a written implementation plan (task_plan.md) and need to execute it in the current session with persistent file-based progress tracking
 ---
 
 # Executing Plans
 
 ## Overview
 
-Load plan, review critically, execute tasks in batches, report for review between batches.
+Load the plan, review critically, execute tasks phase-by-phase, and keep progress durable on disk.
 
-**Core principle:** Batch execution with checkpoints for architect review.
+**Core principle:** Keep the plan + findings + progress in files so humans and agents stay aligned across long tasks.
 
 **Announce at start:** "I'm using the executing-plans skill to implement this plan."
 
+## File-based tracking rules (planning-with-files distilled)
+
+- **Create plan first:** don’t start execution without `task_plan.md`.
+- **Read before decide:** before major decisions, re-read `task_plan.md` to refresh goals.
+- **Update after act:** after completing a task or phase, update phase status and log results.
+- **2-action rule:** after every ~2 tool/command iterations, write key learnings to `progress.md`/`findings.md` so context doesn’t drift.
+- **3 strikes on errors:** do not repeat the same failing action more than once; change approach each attempt, then escalate.
+
 ## The Process
 
-### Step 1: Load and Review Plan
-1. Read plan file
-2. Review critically - identify any questions or concerns about the plan
-3. If concerns: Raise them with your human partner before starting
-4. If no concerns: Create TodoWrite and proceed
+### Step 0: Ensure planning files exist
 
-### Step 2: Execute Batch
-**Default: First 3 tasks**
+In the target project root, ensure these exist (create if missing):
+- `task_plan.md` (phases + status)
+- `findings.md` (discoveries)
+- `progress.md` (execution log)
 
-For each task:
-1. Mark as in_progress
-2. Follow each step exactly (plan has bite-sized steps)
-3. Run verifications as specified
-4. Mark as completed
+### Step 1: Load and review the plan
 
-### Step 3: Report
-When batch complete:
-- Show what was implemented
-- Show verification output
-- Say: "Ready for feedback."
+1. Read `task_plan.md`
+2. Identify blockers/ambiguities **before** starting
+3. If blocked: mark the relevant phase/task as `blocked` and ask the human for clarification
+4. If clear: set overall plan `Status: in_progress`
 
-### Step 4: Continue
-Based on feedback:
-- Apply changes if needed
-- Execute next batch
-- Repeat until complete
+### Step 2: Execute by phase (default)
 
-### Step 5: Complete Development
+For each phase marked `planned`:
+1. Change phase status → `in_progress`
+2. Execute tasks in order (one task at a time)
+3. After each task:
+   - log what you did in `progress.md` (commands + results)
+   - record new knowledge in `findings.md` (if any)
+4. When all tasks in the phase are done and verified: mark phase → `complete`
 
-After all tasks complete and verified:
-- Announce: "I'm using the finishing-a-development-branch skill to complete this work."
-- **REQUIRED SUB-SKILL:** Use superpowers:finishing-a-development-branch
-- Follow that skill to verify tests, present options, execute choice
+### Step 3: Stop conditions
+
+Stop and ask the human when:
+- a task requires product decisions or ambiguous behavior
+- verification fails repeatedly (use the “3 strikes” idea: change approach each time)
+- the plan needs restructuring (add a new phase, reorder, split tasks)
+
+### Step 4: Completion
+
+When all phases are `complete`:
+- mark overall plan `Status: complete`
+- summarize results (what changed + how it was verified)
+
+If and only if a git worktree/feature branch workflow was explicitly used, invoke `uv-finishing-a-development-branch`.
 
 ## When to Stop and Ask for Help
 
@@ -72,13 +85,13 @@ After all tasks complete and verified:
 - Follow plan steps exactly
 - Don't skip verifications
 - Reference skills when plan says to
-- Between batches: just report and wait
-- Stop when blocked, don't guess
-- Never start implementation on main/master branch without explicit user consent
+- Update `task_plan.md` phase status as you go
+- Log key actions/results to `progress.md`
+- Stop when blocked; don’t guess
 
 ## Integration
 
-**Required workflow skills:**
-- **superpowers:using-git-worktrees** - REQUIRED: Set up isolated workspace before starting
-- **superpowers:writing-plans** - Creates the plan this skill executes
-- **superpowers:finishing-a-development-branch** - Complete development after all tasks
+Pairs well with:
+- `uv-writing-plans` — creates `task_plan.md`
+- `uv-systematic-debugging` — when stuck on failing tests/bugs
+- `uv-verification-before-completion` — when about to claim “done”

@@ -35,14 +35,16 @@ Start by understanding the current project context, then ask questions one at a 
 ## After the Design
 
 **Documentation:**
-- Write the validated design to `docs/plans/YYYY-MM-DD-<topic>-design.md`
-- Use elements-of-style:writing-clearly-and-concisely skill if available
-- Commit the design document to git
+- Write the validated design into persistent project files (planning-with-files style), typically in the project root:
+  - `task_plan.md` (Goal/Architecture + phases)
+  - `findings.md` (decisions and rationale)
+- Commit the design if the project uses git.
 
 **Implementation (if continuing):**
 - Ask: "Ready to set up for implementation?"
-- Use superpowers:using-git-worktrees to create isolated workspace
-- Use superpowers:writing-plans to create detailed implementation plan
+- Use `uv-writing-plans` to create/update `task_plan.md`
+- Use `uv-executing-plans` to execute it in the current session
+- Only use `uv-using-git-worktrees` if the user explicitly requests worktree/isolation
 
 ## Key Principles
 

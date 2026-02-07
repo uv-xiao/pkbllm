@@ -1,6 +1,6 @@
 ---
 name: uv-using-superpowers
-description: Use when starting any conversation - establishes how to find and use skills, requiring Skill tool invocation before ANY response including clarifying questions
+description: Use when starting any conversation or task to establish how to find and apply relevant `uv-*` skills early (without platform-specific assumptions).
 ---
 
 <EXTREMELY-IMPORTANT>
@@ -11,11 +11,15 @@ IF A SKILL APPLIES TO YOUR TASK, YOU DO NOT HAVE A CHOICE. YOU MUST USE IT.
 This is not negotiable. This is not optional. You cannot rationalize your way out of this.
 </EXTREMELY-IMPORTANT>
 
-## How to Access Skills
+## How to access skills (generic)
 
-**In Claude Code:** Use the `Skill` tool. When you invoke a skill, its content is loaded and presented to you—follow it directly. Never use the Read tool on skill files.
+Skills are directories containing `SKILL.md`. In this repo, the generated distribution mirror lives under `skills/` and can be listed with:
 
-**In other environments:** Check your platform's documentation for how skills are loaded.
+```bash
+npx -y skills add . --list
+```
+
+If your environment supports “invoking” a skill by name, invoke it. Otherwise, search for the skill’s `SKILL.md` and follow it.
 
 # Using Skills
 
@@ -64,7 +68,7 @@ These thoughts mean STOP—you're rationalizing:
 | "This feels productive" | Undisciplined action wastes time. Skills prevent this. |
 | "I know what that means" | Knowing the concept ≠ using the skill. Invoke it. |
 
-## Skill Priority
+## Skill priority
 
 When multiple skills could apply, use this order:
 
@@ -85,3 +89,8 @@ The skill itself tells you which.
 ## User Instructions
 
 Instructions say WHAT, not HOW. "Add X" or "Fix Y" doesn't mean skip workflows.
+
+## pkbllm-specific notes
+
+- If working from a pkbllm checkout, `uv-using-pkb` (in `common/`) provides repo conventions.
+- By default, do **not** use git worktrees. Use `uv-using-git-worktrees` only when the user explicitly requests isolation.

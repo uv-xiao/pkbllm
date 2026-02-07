@@ -13,9 +13,14 @@ Assume they are a skilled developer, but know almost nothing about our toolset o
 
 **Announce at start:** "I'm using the writing-plans skill to create the implementation plan."
 
-**Context:** This should be run in a dedicated worktree (created by brainstorming skill).
+**Where the plan lives (planning-with-files style):** write the plan to `task_plan.md` in the *target project root* (not inside this pkb repo). Also maintain:
+- `findings.md` — discoveries/notes worth keeping
+- `progress.md` — execution log (commands, test results, errors)
 
-**Save plans to:** `docs/plans/YYYY-MM-DD-<feature-name>.md`
+Use the templates in:
+- `productivity/writing-plans/references/task_plan.md`
+- `productivity/writing-plans/references/findings.md`
+- `productivity/writing-plans/references/progress.md`
 
 ## Bite-Sized Task Granularity
 
@@ -26,14 +31,16 @@ Assume they are a skilled developer, but know almost nothing about our toolset o
 - "Run the tests and make sure they pass" - step
 - "Commit" - step
 
-## Plan Document Header
+## Plan file header (`task_plan.md`)
 
-**Every plan MUST start with this header:**
+**Every `task_plan.md` MUST start with:**
 
 ```markdown
-# [Feature Name] Implementation Plan
+# Task plan: <feature name>
 
-> **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
+**Owner:** <human/agent>  
+**Status:** planning | in_progress | blocked | complete  
+**Last updated:** <YYYY-MM-DD>  
 
 **Goal:** [One sentence describing what this builds]
 
@@ -47,7 +54,11 @@ Assume they are a skilled developer, but know almost nothing about our toolset o
 ## Task Structure
 
 ```markdown
-### Task N: [Component Name]
+## Phase N: <phase name>
+
+**Status:** planned | in_progress | blocked | complete
+
+### Task N.M: <task name>
 
 **Files:**
 - Create: `exact/path/to/file.py`
@@ -96,21 +107,6 @@ git commit -m "feat: add specific feature"
 
 ## Execution Handoff
 
-After saving the plan, offer execution choice:
+After writing `task_plan.md`, proceed by invoking `uv-executing-plans` in the **current session** (default).
 
-**"Plan complete and saved to `docs/plans/<filename>.md`. Two execution options:**
-
-**1. Subagent-Driven (this session)** - I dispatch fresh subagent per task, review between tasks, fast iteration
-
-**2. Parallel Session (separate)** - Open new session with executing-plans, batch execution with checkpoints
-
-**Which approach?"**
-
-**If Subagent-Driven chosen:**
-- **REQUIRED SUB-SKILL:** Use superpowers:subagent-driven-development
-- Stay in this session
-- Fresh subagent per task + code review
-
-**If Parallel Session chosen:**
-- Guide them to open new session in worktree
-- **REQUIRED SUB-SKILL:** New session uses superpowers:executing-plans
+Only use git worktrees if the user explicitly requests worktree/isolation. If a worktree is used and the work completes, follow `uv-finishing-a-development-branch`.

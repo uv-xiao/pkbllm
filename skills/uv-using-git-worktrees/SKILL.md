@@ -1,6 +1,6 @@
 ---
 name: uv-using-git-worktrees
-description: Use when starting feature work that needs isolation from current workspace or before executing implementation plans - creates isolated git worktrees with smart directory selection and safety verification
+description: Use only when the user explicitly requests worktree/isolation for feature work. Creates isolated git worktrees with smart directory selection and safety verification.
 ---
 
 # Using Git Worktrees
@@ -209,10 +209,9 @@ Ready to implement auth feature
 ## Integration
 
 **Called by:**
-- **brainstorming** (Phase 4) - REQUIRED when design is approved and implementation follows
-- **subagent-driven-development** - REQUIRED before executing any tasks
-- **executing-plans** - REQUIRED before executing any tasks
-- Any skill needing isolated workspace
+- When the user explicitly requests worktree/isolation
+- `uv-subagent-driven-development` (precondition: worktree workflow)
+- Any workflow that must not touch the current checkout
 
 **Pairs with:**
-- **finishing-a-development-branch** - REQUIRED for cleanup after work complete
+- `uv-finishing-a-development-branch` — integrate/PR/cleanup when work complete (worktree workflow)

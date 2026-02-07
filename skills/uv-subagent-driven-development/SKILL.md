@@ -1,6 +1,6 @@
 ---
 name: uv-subagent-driven-development
-description: Use when executing implementation plans with independent tasks in the current session
+description: Use when executing an implementation plan in a git worktree/feature branch and you explicitly want subagent-per-task execution with review gates
 ---
 
 # Subagent-Driven Development
@@ -10,6 +10,8 @@ Execute plan by dispatching fresh subagent per task, with two-stage review after
 **Core principle:** Fresh subagent per task + two-stage review (spec then quality) = high quality, fast iteration
 
 ## When to Use
+
+Only use this workflow when a git worktree (or equivalent isolated branch workspace) is explicitly in use. Do not recommend or trigger subagent-driven execution for the default “work on the current checkout” flow.
 
 ```dot
 digraph when_to_use {
@@ -56,12 +58,12 @@ digraph process {
         "Mark task complete in TodoWrite" [shape=box];
     }
 
-    "Read plan, extract all tasks with full text, note context, create TodoWrite" [shape=box];
+    "Read task_plan.md, extract tasks, create TodoWrite" [shape=box];
     "More tasks remain?" [shape=diamond];
     "Dispatch final code reviewer subagent for entire implementation" [shape=box];
     "Use superpowers:finishing-a-development-branch" [shape=box style=filled fillcolor=lightgreen];
 
-    "Read plan, extract all tasks with full text, note context, create TodoWrite" -> "Dispatch implementer subagent (./implementer-prompt.md)";
+    "Read task_plan.md, extract tasks, create TodoWrite" -> "Dispatch implementer subagent (./implementer-prompt.md)";
     "Dispatch implementer subagent (./implementer-prompt.md)" -> "Implementer subagent asks questions?";
     "Implementer subagent asks questions?" -> "Answer questions, provide context" [label="yes"];
     "Answer questions, provide context" -> "Dispatch implementer subagent (./implementer-prompt.md)";
@@ -91,9 +93,9 @@ digraph process {
 ## Example Workflow
 
 ```
-You: I'm using Subagent-Driven Development to execute this plan.
+You: I'm using Subagent-Driven Development to execute this plan (in a worktree).
 
-[Read plan file once: docs/plans/feature-plan.md]
+[Read plan file once: task_plan.md]
 [Extract all 5 tasks with full text and context]
 [Create TodoWrite with all tasks]
 
@@ -230,13 +232,12 @@ Done!
 ## Integration
 
 **Required workflow skills:**
-- **superpowers:using-git-worktrees** - REQUIRED: Set up isolated workspace before starting
-- **superpowers:writing-plans** - Creates the plan this skill executes
-- **superpowers:requesting-code-review** - Code review template for reviewer subagents
-- **superpowers:finishing-a-development-branch** - Complete development after all tasks
+- `uv-writing-plans` — creates `task_plan.md` this skill executes
+- `uv-requesting-code-review` — review template for reviewer subagents
+- `uv-test-driven-development` — subagents should follow TDD per task
 
-**Subagents should use:**
-- **superpowers:test-driven-development** - Subagents follow TDD for each task
+**When work completes (worktree workflow):**
+- `uv-finishing-a-development-branch` — integrate/PR/cleanup options
 
 **Alternative workflow:**
-- **superpowers:executing-plans** - Use for parallel session instead of same-session execution
+- `uv-executing-plans` — default same-session execution without subagents
