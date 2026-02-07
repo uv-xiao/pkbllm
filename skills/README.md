@@ -13,6 +13,7 @@ Do not edit skills here by hand; edit the canonical skill and re-sync.
 | Path | Type | Description |
 | --- | --- | --- |
 | `manifest.json` | file | Data file |
+| `uv-bootstrap-ml-knowledge-authoring/` | skill | Create and curate new ML domain knowledge skills in this repo. Use when adding a new `knowledge/ML/*` skill, extending the curated ML taxonomy (model-architecture, training, distributed, serving, paper, kernel, agents), scaffolding a new skill folder, and ensuring naming (`uv-*`), licensing, and the generated `skills/` mirror stay consistent. |
 | `uv-bootstrap-skill-maintenance/` | skill | Maintain and curate the pkbllm skills repository. Use when adding/importing a new skill, merging skills from external repos, updating or refactoring existing skills, regenerating the generated `skills/` mirror, or ensuring licensing/compliance and naming conventions (all skills must start with `uv-`). |
 | `uv-brainstorming/` | skill | You MUST use this before any creative work - creating features, building components, adding functionality, or modifying behavior. Explores user intent, requirements and design before implementation. |
 | `uv-content-prompts/` | skill | Convert raw material into per-page Content PROMPTs by analyzing content density, intent, and slide usage. Outputs $HUMAN_MATERIAL_PATH/slides/<deck>/prompts/content/<deck>.md. Use when the user has notes/materials and wants a well-planned per-page content prompt before styling. |
