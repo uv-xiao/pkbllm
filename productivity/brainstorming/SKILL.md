@@ -37,7 +37,7 @@ Start by understanding the current project context, then ask questions one at a 
 **Documentation:**
 - Write the validated design into persistent project files (planning-with-files style), typically in the project root:
   - `task_plan.md` (Goal/Architecture + phases)
-  - `findings.md` (decisions and rationale)
+  - Keep decisions/rationale in `task_plan.md` under `## Findings / notes`
 - Commit the design if the project uses git.
 
 **Implementation (if continuing):**

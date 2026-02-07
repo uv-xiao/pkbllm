@@ -13,14 +13,13 @@ Assume they are a skilled developer, but know almost nothing about our toolset o
 
 **Announce at start:** "I'm using the writing-plans skill to create the implementation plan."
 
-**Where the plan lives (planning-with-files style):** write the plan to `task_plan.md` in the *target project root* (not inside this pkb repo). Also maintain:
-- `findings.md` — discoveries/notes worth keeping
-- `progress.md` — execution log (commands, test results, errors)
+**Where the plan lives (planning-with-files style):** write the plan to `task_plan.md` in the *target project root* (not inside this pkb repo). Use `task_plan.md` as the single durable tracker by keeping these sections up to date:
+- `## Findings / notes` — decisions and discoveries worth keeping
+- `## Progress log` — what you did + evidence (commands, outputs)
+- `## Errors encountered` — failure → attempt → fix/next step
 
 Use the templates in:
 - `productivity/writing-plans/references/task_plan.md`
-- `productivity/writing-plans/references/findings.md`
-- `productivity/writing-plans/references/progress.md`
 
 ## Bite-Sized Task Granularity
 

@@ -45,8 +45,17 @@
 
 ...
 
+## Findings / notes
+
+- <key decision, rationale, or discovery>
+
+## Progress log
+
+| Date | Change | Evidence (command / link / output) |
+| --- | --- | --- |
+| <YYYY-MM-DD> | <what you did> | <command + summary> |
+
 ## Errors encountered
 
 | Error | Attempt | Fix / next step |
 | --- | --- | --- |
-

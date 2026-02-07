@@ -9,7 +9,7 @@ description: Use when you have a written implementation plan (task_plan.md) and 
 
 Load the plan, review critically, execute tasks phase-by-phase, and keep progress durable on disk.
 
-**Core principle:** Keep the plan + findings + progress in files so humans and agents stay aligned across long tasks.
+**Core principle:** Keep the plan and execution state durable on disk in `task_plan.md` so humans and agents stay aligned across long tasks.
 
 **Announce at start:** "I'm using the executing-plans skill to implement this plan."
 
@@ -18,17 +18,15 @@ Load the plan, review critically, execute tasks phase-by-phase, and keep progres
 - **Create plan first:** don’t start execution without `task_plan.md`.
 - **Read before decide:** before major decisions, re-read `task_plan.md` to refresh goals.
 - **Update after act:** after completing a task or phase, update phase status and log results.
-- **2-action rule:** after every ~2 tool/command iterations, write key learnings to `progress.md`/`findings.md` so context doesn’t drift.
+- **2-action rule:** after every ~2 tool/command iterations, update `task_plan.md` (task status + `## Progress log` / `## Findings / notes`) so context doesn’t drift.
 - **3 strikes on errors:** do not repeat the same failing action more than once; change approach each attempt, then escalate.
 
 ## The Process
 
 ### Step 0: Ensure planning files exist
 
-In the target project root, ensure these exist (create if missing):
-- `task_plan.md` (phases + status)
-- `findings.md` (discoveries)
-- `progress.md` (execution log)
+In the target project root, ensure this exists (create if missing):
+- `task_plan.md` (phases + status + findings/progress/errors sections)
 
 ### Step 1: Load and review the plan
 
@@ -43,8 +41,9 @@ For each phase marked `planned`:
 1. Change phase status → `in_progress`
 2. Execute tasks in order (one task at a time)
 3. After each task:
-   - log what you did in `progress.md` (commands + results)
-   - record new knowledge in `findings.md` (if any)
+   - update task/phase status in `task_plan.md`
+   - append a line to `## Progress log` (commands + results)
+   - add new knowledge to `## Findings / notes` (if any)
 4. When all tasks in the phase are done and verified: mark phase → `complete`
 
 ### Step 3: Stop conditions
@@ -86,7 +85,7 @@ If and only if a git worktree/feature branch workflow was explicitly used, invok
 - Don't skip verifications
 - Reference skills when plan says to
 - Update `task_plan.md` phase status as you go
-- Log key actions/results to `progress.md`
+- Keep `task_plan.md` up to date as you go
 - Stop when blocked; don’t guess
 
 ## Integration
