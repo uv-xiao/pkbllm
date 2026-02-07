@@ -11,6 +11,14 @@ description: Use when creating new skills, editing existing skills, or verifying
 
 **Personal skills live in agent-specific directories (`~/.claude/skills` for Claude Code, `~/.agents/skills/` for Codex)** 
 
+## pkbllm integration (when working in this repo)
+
+When the task is “add/modify pkbllm skills” (not personal skills):
+
+- Use `uv-bootstrap-skill-maintenance` for canonical-vs-mirror rules and licensing.
+- Use `uv-bootstrap-skill-linking` to update skill relationships (prerequisite/companion/follow-up/escalation) so workflows compose.
+- After changes, regenerate the mirror with `python bootstrap/scripts/update_skills_mirror.py all`.
+
 You write test cases (pressure scenarios with subagents), watch them fail (baseline behavior), write the skill (documentation), watch tests pass (agents comply), and refactor (close loopholes).
 
 **Core principle:** If you didn't watch an agent fail without the skill, you don't know if the skill teaches the right thing.

@@ -94,3 +94,6 @@ Instructions say WHAT, not HOW. "Add X" or "Fix Y" doesn't mean skip workflows.
 
 - If working from a pkbllm checkout, `uv-using-pkb` (in `common/`) provides repo conventions.
 - By default, do **not** use git worktrees. Use `uv-using-git-worktrees` only when the user explicitly requests isolation.
+- If adding/editing skills or changing how skills compose into workflows, also use:
+  - `uv-bootstrap-skill-maintenance` (repo conventions + mirroring)
+  - `uv-bootstrap-skill-linking` (cross-skill relationships and co-invocation rules)

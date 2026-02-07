@@ -110,4 +110,6 @@ After writing `task_plan.md`, proceed by invoking `uv-executing-plans` in the **
 
 If the work is a research/framework repo where documentation must evolve with features, also initialize and maintain the docs structure using `uv-research-project-docs` and include explicit “sync docs” steps after feature-completing tasks.
 
+If the plan includes adding/modifying pkbllm skills or changing workflows between skills, include an explicit task to run `uv-bootstrap-skill-linking` so the related skills’ Integration sections and trigger descriptions stay consistent.
+
 Only use git worktrees if the user explicitly requests worktree/isolation. If a worktree is used and the work completes, follow `uv-finishing-a-development-branch`.

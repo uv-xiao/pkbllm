@@ -92,6 +92,7 @@ If and only if a git worktree/feature branch workflow was explicitly used, invok
 
 Pairs well with:
 - `uv-writing-plans` — creates `task_plan.md`
+- `uv-bootstrap-skill-linking` — when the plan changes how skills relate or should be co-invoked
 - `uv-research-project-docs` — keep research docs/spec/eval synchronized when implementing features
 - `uv-systematic-debugging` — when stuck on failing tests/bugs
 - `uv-verification-before-completion` — when about to claim “done”
