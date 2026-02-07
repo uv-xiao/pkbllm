@@ -25,6 +25,7 @@ HUMAN_MATERIAL_PATH=/abs/path/to/human-materials python human/init-human-materia
 
 - Git repo at the target path (if not already a git repo)
 - `.references/` for local downloads/clones (gitignored; keeps `.references/README.md`)
+- `$HUMAN_MATERIAL_PATH/.agents/config.toml` for configuring reference locations and key files
 - `slides/` workspace:
   - `slides/styles/*.md` (minimal style briefs)
   - `slides/README.md` describing per-deck structure:

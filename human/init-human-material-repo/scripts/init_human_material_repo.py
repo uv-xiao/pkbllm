@@ -44,6 +44,20 @@ slides/**/artifacts/**/rasterized/
 """
 
 
+def _default_config_toml() -> str:
+    return """[pkbllm]
+# Paths are relative to the HUMAN_MATERIAL_PATH repo root unless absolute.
+pdfs_dir = ".references/pdfs"
+arxiv_dir = ".references/arxiv"
+repos_dir = ".references/repos"
+
+# OpenRouter API key file. Supported formats:
+# - raw key string
+# - a single line: OPENROUTER_API_KEY=...
+openrouter_api_key_file = ".OPENROUTER_API_KEY"
+"""
+
+
 def _slides_readme() -> str:
     return """# Slides workspace
 
@@ -140,6 +154,9 @@ def init_repo(root: Path, *, overwrite: bool) -> None:
     )
 
     (root / ".references").mkdir(parents=True, exist_ok=True)
+    (root / ".references" / "pdfs").mkdir(parents=True, exist_ok=True)
+    (root / ".references" / "arxiv").mkdir(parents=True, exist_ok=True)
+    (root / ".references" / "repos").mkdir(parents=True, exist_ok=True)
     _write_text(
         root / ".references" / "README.md",
         """# Local references (gitignored)
@@ -148,13 +165,16 @@ Put downloaded PDFs, arXiv source zips, cloned repos, and other large/local refe
 
 Suggested layout:
 
-- `.references/papers/` (PDFs)
+- `.references/pdfs/` (PDFs)
 - `.references/arxiv/` (source zips / extracted sources)
 - `.references/repos/` (cloned code repos)
 
 """,
         overwrite=overwrite,
     )
+
+    (root / ".agents").mkdir(parents=True, exist_ok=True)
+    _write_text(root / ".agents" / "config.toml", _default_config_toml(), overwrite=overwrite)
 
     # Top-level folders
     for d in ["slides", "manuscripts", "exercises"]:
