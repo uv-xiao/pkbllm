@@ -307,6 +307,9 @@ def update_all_readmes(root: Path) -> int:
         # Skip docs entirely.
         if "docs" in readme.parts:
             continue
+        # Skip examples (may include submodules / generated artifacts).
+        if "examples" in readme.parts:
+            continue
         # Skip generated skill dirs (those have SKILL.md, and are filtered above),
         # but keep `skills/README.md`.
         if update_readme_table(readme):
