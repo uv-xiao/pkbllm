@@ -27,7 +27,8 @@ This skill manages a *docs root* directory (default recommendation: `docs/` in t
 Use the scaffold script (works against any target repo path):
 
 ```bash
-python productivity/research-project-docs/scripts/init_research_project_docs.py \
+# Run from this skill directory (the folder containing this SKILL.md):
+python scripts/init_research_project_docs.py \
   --project-root /abs/path/to/your/repo \
   --docs-root docs
 ```
@@ -61,4 +62,3 @@ Pairs well with:
 - `uv-writing-plans` — include “sync docs” tasks in `task_plan.md`
 - `uv-executing-plans` — keep docs in sync while executing
 - `uv-bootstrap-skill-linking` — keep skill relationships updated when adding new workflows
-

@@ -19,7 +19,8 @@ into a tutorial under `$HUMAN_MATERIAL_PATH/exercises/tutorials/<topic>/`.
 ## Quick start
 
 ```bash
-python human/exercises/tutorial-generator/scripts/init_tutorial.py --topic \"vllm-internals\"
+# Run from this skill directory (the folder containing this SKILL.md):
+python scripts/init_tutorial.py --topic \"vllm-internals\"
 ```
 
 ## Tutorial structure (default)
@@ -57,4 +58,3 @@ Prerequisites:
 
 Maintenance:
 - If you add/change these workflows, run `uv-bootstrap-skill-linking`.
-

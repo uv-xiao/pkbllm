@@ -74,7 +74,8 @@ Avoid:
 Use the scaffold script to create a new skill directory + template `SKILL.md`:
 
 ```bash
-python bootstrap/ml-knowledge-authoring/scripts/scaffold_ml_knowledge_skill.py \
+# Run from this skill directory (the folder containing this SKILL.md):
+python scripts/scaffold_ml_knowledge_skill.py \
   --category model-architecture \
   --dir flashinfer \
   --name uv-flashinfer-kernels \

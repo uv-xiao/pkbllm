@@ -24,19 +24,20 @@ Config precedence (repo overrides user):
 1) Download paper assets:
 
 ```bash
-python skills/uv-read-arxiv-paper/scripts/download_arxiv.py https://arxiv.org/abs/2601.07372
+# Run from this skill directory (the folder containing this SKILL.md):
+python scripts/download_arxiv.py https://arxiv.org/abs/2601.07372
 ```
 
 2) Extract the TeX source:
 
 ```bash
-python skills/uv-read-arxiv-paper/scripts/extract_arxiv_source.py 2601.07372
+python scripts/extract_arxiv_source.py 2601.07372
 ```
 
 3) Write the report:
 
 - Create `$HUMAN_MATERIAL_PATH/research/<paper_slug>/`
-- Start from `skills/uv-read-arxiv-paper/assets/report_template.md`
+- Start from `assets/report_template.md`
 - Fill it with a coherent story:
   - What problem is being solved and why now?
   - What is the key trick (the one idea that makes it work)?
@@ -57,4 +58,3 @@ python skills/uv-read-arxiv-paper/scripts/extract_arxiv_source.py 2601.07372
    - Use the template (copy it and fill it)
    - Prefer concrete examples, small equations, and “why this design” explanations
    - Include at least one visual explanation if it helps (optionally generate via `uv-scientific-schematics`)
-

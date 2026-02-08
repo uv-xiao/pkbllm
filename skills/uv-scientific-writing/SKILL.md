@@ -39,7 +39,8 @@ If the user says **YES** (e.g. `generate_schematic: YES`), generate 1–2 figure
 Example:
 
 ```bash
-python skills/uv-scientific-schematics/scripts/generate_schematic.py "method overview flowchart" -o "$HUMAN_MATERIAL_PATH/manuscripts/<project>/figures/method.png" --doc-type journal
+# Run from the `uv-scientific-schematics` skill directory:
+python scripts/generate_schematic.py "method overview flowchart" -o "$HUMAN_MATERIAL_PATH/manuscripts/<project>/figures/method.png" --doc-type journal
 ```
 
 Then reference the generated image(s) from the manuscript.

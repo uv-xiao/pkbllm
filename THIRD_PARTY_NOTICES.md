@@ -80,12 +80,11 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-## uv-xiao/slider (no upstream LICENSE file found)
+## uv-xiao/slider (copyright holder: uv-xiao)
 
 Some human-material skills were imported from `uv-xiao/slider`. At the time of import, the upstream
-repository did not include a top-level LICENSE file. If you are not the copyright holder for those
-files, do not redistribute them. If you are the copyright holder, they may be distributed under
-this repository’s `LICENSE`.
+repository did not include a top-level LICENSE file. These files are included here with permission
+from the copyright holder and may be distributed under this repository’s `LICENSE`.
 
 ## karpathy/nanochat (MIT)
 

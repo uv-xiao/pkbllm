@@ -20,7 +20,8 @@ Use `$HUMAN_MATERIAL_PATH/.references/repos/` for clones (configurable).
 Create a session (also clones if needed):
 
 ```bash
-python human/hands-on-learning/scripts/init_hands_on_session.py https://github.com/vllm-project/vllm
+# Run from this skill directory (the folder containing this SKILL.md):
+python scripts/init_hands_on_session.py https://github.com/vllm-project/vllm
 ```
 
 ## Session workflow (default)
@@ -57,4 +58,3 @@ Prerequisites / follow-ups:
 - Use `uv-repo-analysis` first to know *what* to profile and *where* the hot paths are.
 - Use `uv-tutorial-generator` after the session to convert findings into teachable material under `$HUMAN_MATERIAL_PATH/exercises/`.
 - If you add/change these workflows, run `uv-bootstrap-skill-linking`.
-

@@ -33,7 +33,8 @@ Downloads/clones should go under (gitignored):
 Use the scaffold script to create the file structure:
 
 ```bash
-python skills/uv-create-paper-exercises/scripts/scaffold_exercise_pack.py --slug <paper_slug>
+# Run from this skill directory (the folder containing this SKILL.md):
+python scripts/scaffold_exercise_pack.py --slug <paper_slug>
 ```
 
 Then fill in the prompts/solutions based on the paper.
@@ -77,4 +78,3 @@ Use them to:
 - Run checks
 - Print diffs / failed tests
 - Reveal golden solutions + explanations when asked
-

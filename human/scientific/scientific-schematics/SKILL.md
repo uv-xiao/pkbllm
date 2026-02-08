@@ -36,18 +36,20 @@ Scientific schematics and diagrams transform complex concepts into clear visual 
 
 Create any scientific diagram by simply describing it. Nano Banana Pro handles everything automatically with **smart iteration**:
 
+Run from this skill directory (the folder containing this SKILL.md):
+
 ```bash
 # Generate for journal paper (highest quality threshold: 8.5/10)
-python skills/uv-scientific-schematics/scripts/generate_schematic.py "CONSORT participant flow diagram with 500 screened, 150 excluded, 350 randomized" -o "$HUMAN_MATERIAL_PATH/research/<topic>/figures/consort.png" --doc-type journal
+python scripts/generate_schematic.py "CONSORT participant flow diagram with 500 screened, 150 excluded, 350 randomized" -o "$HUMAN_MATERIAL_PATH/research/<topic>/figures/consort.png" --doc-type journal
 
 # Generate for presentation (lower threshold: 6.5/10 - faster)
-python skills/uv-scientific-schematics/scripts/generate_schematic.py "Transformer encoder-decoder architecture showing multi-head attention" -o "$HUMAN_MATERIAL_PATH/research/<topic>/figures/transformer.png" --doc-type presentation
+python scripts/generate_schematic.py "Transformer encoder-decoder architecture showing multi-head attention" -o "$HUMAN_MATERIAL_PATH/research/<topic>/figures/transformer.png" --doc-type presentation
 
 # Generate for poster (moderate threshold: 7.0/10)
-python skills/uv-scientific-schematics/scripts/generate_schematic.py "MAPK signaling pathway from EGFR to gene transcription" -o "$HUMAN_MATERIAL_PATH/research/<topic>/figures/mapk_pathway.png" --doc-type poster
+python scripts/generate_schematic.py "MAPK signaling pathway from EGFR to gene transcription" -o "$HUMAN_MATERIAL_PATH/research/<topic>/figures/mapk_pathway.png" --doc-type poster
 
 # Custom max iterations (max 2)
-python skills/uv-scientific-schematics/scripts/generate_schematic.py "Complex circuit diagram with op-amp, resistors, and capacitors" -o "$HUMAN_MATERIAL_PATH/research/<topic>/figures/circuit.png" --iterations 2 --doc-type journal
+python scripts/generate_schematic.py "Complex circuit diagram with op-amp, resistors, and capacitors" -o "$HUMAN_MATERIAL_PATH/research/<topic>/figures/circuit.png" --iterations 2 --doc-type journal
 ```
 
 **What happens behind the scenes:**
@@ -131,7 +133,7 @@ This skill should be used when:
 **Simply describe your diagram in natural language.** Nano Banana Pro generates it automatically:
 
 ```bash
-python skills/uv-scientific-schematics/scripts/generate_schematic.py "your diagram description" -o output.png
+python scripts/generate_schematic.py "your diagram description" -o output.png
 ```
 
 **That's it!** The AI handles:
@@ -287,25 +289,25 @@ for iteration in results['iterations']:
 
 ```bash
 # Basic usage (default threshold 7.5/10)
-python skills/uv-scientific-schematics/scripts/generate_schematic.py "diagram description" -o output.png
+python scripts/generate_schematic.py "diagram description" -o output.png
 
 # Specify document type for appropriate quality threshold
-python skills/uv-scientific-schematics/scripts/generate_schematic.py "diagram" -o out.png --doc-type journal      # 8.5/10
-python skills/uv-scientific-schematics/scripts/generate_schematic.py "diagram" -o out.png --doc-type conference   # 8.0/10
-python skills/uv-scientific-schematics/scripts/generate_schematic.py "diagram" -o out.png --doc-type poster       # 7.0/10
-python skills/uv-scientific-schematics/scripts/generate_schematic.py "diagram" -o out.png --doc-type presentation # 6.5/10
+python scripts/generate_schematic.py "diagram" -o out.png --doc-type journal      # 8.5/10
+python scripts/generate_schematic.py "diagram" -o out.png --doc-type conference   # 8.0/10
+python scripts/generate_schematic.py "diagram" -o out.png --doc-type poster       # 7.0/10
+python scripts/generate_schematic.py "diagram" -o out.png --doc-type presentation # 6.5/10
 
 # Custom max iterations (1-2)
-python skills/uv-scientific-schematics/scripts/generate_schematic.py "complex diagram" -o diagram.png --iterations 2
+python scripts/generate_schematic.py "complex diagram" -o diagram.png --iterations 2
 
 # Verbose output (see all API calls and reviews)
-python skills/uv-scientific-schematics/scripts/generate_schematic.py "flowchart" -o flow.png -v
+python scripts/generate_schematic.py "flowchart" -o flow.png -v
 
 # Provide API key via flag
-python skills/uv-scientific-schematics/scripts/generate_schematic.py "diagram" -o out.png --api-key "sk-or-v1-..."
+python scripts/generate_schematic.py "diagram" -o out.png --api-key "sk-or-v1-..."
 
 # Combine options
-python skills/uv-scientific-schematics/scripts/generate_schematic.py "neural network" -o nn.png --doc-type journal --iterations 2 -v
+python scripts/generate_schematic.py "neural network" -o nn.png --doc-type journal --iterations 2 -v
 ```
 
 ### Prompt Engineering Tips
@@ -349,7 +351,7 @@ python skills/uv-scientific-schematics/scripts/generate_schematic.py "neural net
 
 ### Example 1: CONSORT Flowchart
 ```bash
-python skills/uv-scientific-schematics/scripts/generate_schematic.py \
+python scripts/generate_schematic.py \
   "CONSORT participant flow diagram for randomized controlled trial. \
    Start with 'Assessed for eligibility (n=500)' at top. \
    Show 'Excluded (n=150)' with reasons: age<18 (n=80), declined (n=50), other (n=20). \
@@ -363,7 +365,7 @@ python skills/uv-scientific-schematics/scripts/generate_schematic.py \
 
 ### Example 2: Neural Network Architecture
 ```bash
-python skills/uv-scientific-schematics/scripts/generate_schematic.py \
+python scripts/generate_schematic.py \
   "Transformer encoder-decoder architecture diagram. \
    Left side: Encoder stack with input embedding, positional encoding, \
    multi-head self-attention, add & norm, feed-forward, add & norm. \
@@ -378,7 +380,7 @@ python skills/uv-scientific-schematics/scripts/generate_schematic.py \
 
 ### Example 3: Biological Pathway
 ```bash
-python skills/uv-scientific-schematics/scripts/generate_schematic.py \
+python scripts/generate_schematic.py \
   "MAPK signaling pathway diagram. \
    Start with EGFR receptor at cell membrane (top). \
    Arrow down to RAS (with GTP label). \
@@ -394,7 +396,7 @@ python skills/uv-scientific-schematics/scripts/generate_schematic.py \
 
 ### Example 4: System Architecture
 ```bash
-python skills/uv-scientific-schematics/scripts/generate_schematic.py \
+python scripts/generate_schematic.py \
   "IoT system architecture block diagram. \
    Bottom layer: Sensors (temperature, humidity, motion) in green boxes. \
    Middle layer: Microcontroller (ESP32) in blue box. \
@@ -413,13 +415,13 @@ The main entry point for generating scientific schematics:
 
 ```bash
 # Basic usage
-python skills/uv-scientific-schematics/scripts/generate_schematic.py "diagram description" -o output.png
+python scripts/generate_schematic.py "diagram description" -o output.png
 
 # Custom iterations (max 2)
-python skills/uv-scientific-schematics/scripts/generate_schematic.py "complex diagram" -o diagram.png --iterations 2
+python scripts/generate_schematic.py "complex diagram" -o diagram.png --iterations 2
 
 # Verbose mode
-python skills/uv-scientific-schematics/scripts/generate_schematic.py "diagram" -o out.png -v
+python scripts/generate_schematic.py "diagram" -o out.png -v
 ```
 
 **Note:** The Nano Banana Pro AI generation system includes automatic quality review in its iterative refinement process. Each iteration is evaluated for scientific accuracy, clarity, and accessibility.
@@ -613,7 +615,7 @@ export OPENROUTER_API_KEY='your_api_key_here'
 
 **Simplest possible usage:**
 ```bash
-python skills/uv-scientific-schematics/scripts/generate_schematic.py "your diagram description" -o output.png
+python scripts/generate_schematic.py "your diagram description" -o output.png
 ```
 
 ---

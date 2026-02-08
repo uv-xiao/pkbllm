@@ -12,13 +12,14 @@ Run the initializer script to create a git repo and the expected directory struc
 Prefer passing an explicit path; otherwise rely on `HUMAN_MATERIAL_PATH`.
 
 ```bash
-python human/init-human-material-repo/scripts/init_human_material_repo.py --path /abs/path/to/human-materials
+# Run from this skill directory (the folder containing this SKILL.md):
+python scripts/init_human_material_repo.py --path /abs/path/to/human-materials
 ```
 
 Or:
 
 ```bash
-HUMAN_MATERIAL_PATH=/abs/path/to/human-materials python human/init-human-material-repo/scripts/init_human_material_repo.py
+HUMAN_MATERIAL_PATH=/abs/path/to/human-materials python scripts/init_human_material_repo.py
 ```
 
 ## What it creates

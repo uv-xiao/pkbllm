@@ -21,7 +21,8 @@ Config precedence (repo overrides user):
 Initialize workspace + clone (if needed):
 
 ```bash
-python human/repo-analysis/scripts/init_repo_analysis.py https://github.com/vllm-project/vllm
+# Run from this skill directory (the folder containing this SKILL.md):
+python scripts/init_repo_analysis.py https://github.com/vllm-project/vllm
 ```
 
 This prints:
@@ -30,7 +31,7 @@ This prints:
 
 ## What to produce (`repo_analysis.md`)
 
-Use the template at `human/repo-analysis/assets/repo_analysis_template.md` and fill:
+Use the template at `assets/repo_analysis_template.md` and fill:
 
 1. **TL;DR**: what the repo is, who it’s for, why it’s interesting.
 2. **Architecture map**: a single diagram + a module table.
@@ -78,4 +79,3 @@ Prerequisites / follow-ups:
 - If you will run experiments or profiling, use `uv-hands-on-learning` after this analysis.
 - If you want to teach the repo’s internals, use `uv-tutorial-generator` and base it on the analysis + hands-on results.
 - If you add/change these workflows, run `uv-bootstrap-skill-linking` to keep relationships consistent.
-
