@@ -72,6 +72,12 @@
     "slug": "uv-finishing-a-development-branch"
   },
   {
+    "canonical_path": "human/hands-on-learning",
+    "description": "Run a structured hands-on exploration session for an ML/LLM repository (setup, environment detection, experiment plan, execution, profiling, and reporting). Use when you want to validate performance claims, identify bottlenecks, reproduce benchmarks, or turn repo analysis into concrete experiments stored alongside the repo analysis report.",
+    "name": "uv-hands-on-learning",
+    "slug": "uv-hands-on-learning"
+  },
+  {
     "canonical_path": "knowledge/ML/model-architecture/litgpt",
     "description": "Implements and trains LLMs using Lightning AI's LitGPT with 20+ pretrained architectures (Llama, Gemma, Phi, Qwen, Mistral). Use when need clean model implementations, educational understanding of architectures, or production fine-tuning with LoRA/QLoRA. Single-file implementations, no abstraction layers.",
     "name": "uv-implementing-llms-litgpt",
@@ -148,6 +154,12 @@
     "description": "Use when receiving code review feedback, before implementing suggestions, especially if feedback seems unclear or technically questionable - requires technical rigor and verification, not performative agreement or blind implementation",
     "name": "uv-receiving-code-review",
     "slug": "uv-receiving-code-review"
+  },
+  {
+    "canonical_path": "human/repo-analysis",
+    "description": "Analyze a code repository to understand architecture, key components, data flow, and extension points. Use when onboarding to an unfamiliar repo, preparing a hands-on profiling session, or extracting LLM-specific implementation details (attention/KV cache/scheduler/decoding) after determining the repo is LLM-related.",
+    "name": "uv-repo-analysis",
+    "slug": "uv-repo-analysis"
   },
   {
     "canonical_path": "productivity/requesting-code-review",
@@ -244,6 +256,12 @@
     "description": "Use when implementing any feature or bugfix, before writing implementation code",
     "name": "uv-test-driven-development",
     "slug": "uv-test-driven-development"
+  },
+  {
+    "canonical_path": "human/exercises/tutorial-generator",
+    "description": "Create structured tutorials from repo analysis and hands-on learning artifacts. Use when turning an ML/LLM codebase understanding into teachable material with objectives, diagrams, runnable examples, and exercises stored under $HUMAN_MATERIAL_PATH/exercises/.",
+    "name": "uv-tutorial-generator",
+    "slug": "uv-tutorial-generator"
   },
   {
     "canonical_path": "productivity/using-git-worktrees",

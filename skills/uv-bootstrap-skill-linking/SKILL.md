@@ -56,4 +56,5 @@ npx -y skills add . --list
 - Plan → execute: `uv-writing-plans` ↔ `uv-executing-plans`
 - Execute → debug: `uv-executing-plans` ↔ `uv-systematic-debugging`
 - Feature change → docs sync: `uv-executing-plans` ↔ `uv-research-project-docs`
-
+- Repo understanding → experiments: `uv-repo-analysis` → `uv-hands-on-learning`
+- Experiments → teaching: `uv-hands-on-learning` → `uv-tutorial-generator`
