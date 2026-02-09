@@ -231,6 +231,20 @@ def _has_skill_ancestor(dir_path: Path) -> bool:
     return False
 
 
+def _has_git_submodule_ancestor(path: Path) -> bool:
+    """
+    Skip README.md files inside git submodules to avoid mutating vendored content.
+    A submodule typically contains a `.git` file (or directory) at its root.
+    """
+    for candidate in [path] + list(path.parents):
+        if candidate == ROOT:
+            break
+        git_marker = candidate / ".git"
+        if git_marker.exists():
+            return True
+    return False
+
+
 def _is_allowed_readme(readme: Path, allowed_roots: list[str]) -> bool:
     rel = readme.relative_to(ROOT)
     for root in allowed_roots:
@@ -380,6 +394,8 @@ def update_all_readmes(root: Path) -> int:
 
     updated = 0
     for readme in sorted(root.rglob("README.md")):
+        if _has_git_submodule_ancestor(readme.parent):
+            continue
         # Skip reference clones.
         if ".references" in readme.parts:
             continue
