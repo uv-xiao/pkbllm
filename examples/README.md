@@ -15,10 +15,3 @@ This is an example `$HUMAN_MATERIAL_PATH` repo containing:
 On this machine, the submodule URL is configured as a local path (see `.gitmodules`).
 If you want this to be cloneable elsewhere, point it at a remote repo you control and
 update the submodule reference.
-
-## <TABLE>
-<!-- PKBLLM_TABLE_START -->
-| Path | Type | Description |
-| --- | --- | --- |
-| `materials/` | group | (3 skill(s)) |
-<!-- PKBLLM_TABLE_END -->

@@ -12,6 +12,15 @@ from typing import Iterable, Optional, TypedDict
 
 
 ROOT = Path(__file__).resolve().parents[2]
+CONFIG_PATH = ROOT / "bootstrap" / "scripts" / "update_skills_mirror.config.json"
+DEFAULT_README_TABLE_ROOTS = [
+    "README.md",
+    "bootstrap",
+    "common",
+    "human",
+    "knowledge",
+    "productivity",
+]
 
 
 def _ensure_dir(path: Path) -> None:
@@ -195,6 +204,73 @@ def _count_skills_under(path: Path) -> int:
     return sum(1 for _ in path.rglob("SKILL.md"))
 
 
+def _load_config() -> dict:
+    if not CONFIG_PATH.is_file():
+        return {}
+    try:
+        return json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
+    except Exception as e:
+        raise SystemExit(f"Failed to parse config: {CONFIG_PATH} ({e})")
+
+
+def _readme_table_roots(cfg: dict) -> list[str]:
+    roots = cfg.get("readme_table_roots")
+    if isinstance(roots, list) and all(isinstance(x, str) for x in roots):
+        return roots
+    return list(DEFAULT_README_TABLE_ROOTS)
+
+
+def _has_skill_ancestor(dir_path: Path) -> bool:
+    for candidate in [dir_path] + list(dir_path.parents):
+        if candidate == ROOT.parent:
+            break
+        if (candidate / "SKILL.md").is_file():
+            return True
+        if candidate == ROOT:
+            break
+    return False
+
+
+def _is_allowed_readme(readme: Path, allowed_roots: list[str]) -> bool:
+    rel = readme.relative_to(ROOT)
+    for root in allowed_roots:
+        root_p = Path(root)
+        if root_p == Path("README.md"):
+            if rel == Path("README.md"):
+                return True
+            continue
+        if root_p == Path("."):
+            return True
+        # treat as directory prefix
+        if rel.parts and rel.parts[0] == root_p.parts[0]:
+            return True
+    return False
+
+
+def _remove_readme_table(readme_path: Path) -> bool:
+    if not readme_path.is_file():
+        return False
+    original = readme_path.read_text(encoding="utf-8", errors="replace")
+    lines = original.splitlines()
+
+    drop_from: Optional[int] = None
+    for i, line in enumerate(lines):
+        if line.strip() == "## <TABLE>":
+            drop_from = i
+            break
+    if drop_from is None:
+        return False
+
+    lines = lines[:drop_from]
+    while lines and lines[-1].strip() == "":
+        lines.pop()
+    updated = "\n".join(lines + [""])
+    if updated != original:
+        readme_path.write_text(updated, encoding="utf-8")
+        return True
+    return False
+
+
 def _readme_table_for_dir(dir_path: Path) -> str:
     rows: list[tuple[str, str, str]] = []
 
@@ -299,6 +375,9 @@ def update_readme_table(readme_path: Path) -> bool:
 
 
 def update_all_readmes(root: Path) -> int:
+    cfg = _load_config()
+    allowed_roots = _readme_table_roots(cfg)
+
     updated = 0
     for readme in sorted(root.rglob("README.md")):
         # Skip reference clones.
@@ -307,11 +386,14 @@ def update_all_readmes(root: Path) -> int:
         # Skip docs entirely.
         if "docs" in readme.parts:
             continue
-        # Skip examples (may include submodules / generated artifacts).
-        if "examples" in readme.parts:
+
+        # Only maintain README tables in configured roots. Also never inject tables
+        # into README.md files inside a skill directory subtree.
+        if not _is_allowed_readme(readme, allowed_roots) or _has_skill_ancestor(readme.parent):
+            if _remove_readme_table(readme):
+                updated += 1
             continue
-        # Skip generated skill dirs (those have SKILL.md, and are filtered above),
-        # but keep `skills/README.md`.
+
         if update_readme_table(readme):
             updated += 1
     return updated

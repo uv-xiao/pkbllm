@@ -14,12 +14,3 @@
 1. Do `programming/` (implementation + tests)
 2. Do `modeling/` (calculations + reasoning)
 3. Use `skills/uv-check-*` to validate and review golden solutions
-
-## <TABLE>
-<!-- PKBLLM_TABLE_START -->
-| Path | Type | Description |
-| --- | --- | --- |
-| `modeling/` | dir |  |
-| `programming/` | dir |  |
-| `skills/` | dir |  |
-<!-- PKBLLM_TABLE_END -->
