@@ -7,6 +7,12 @@ description: Analyze a code repository to understand architecture, key component
 
 Produce a high-signal repository analysis that a human can read quickly and use to drive implementation, debugging, and profiling.
 
+## Non-negotiables (requirements)
+
+- The report must be actionable: it includes real paths and **file:line pointers** (not vague descriptions).
+- If LLM-related, the report must separate **prefill vs decode**, and include KV cache + scheduler + sampling surfaces.
+- No placeholder markers like `<...>` may remain in tracked output.
+
 ## Output locations (pkbllm convention)
 
 - **Tracked output**: `$HUMAN_MATERIAL_PATH/research/<repo_slug>/repo_analysis.md`
@@ -73,9 +79,20 @@ rg -n \"sample\\(|logits|temperature|top_p|top_k\" -S .
 rg -n \"flash(attn|infer)|attention kernel|triton|cuda\" -S .
 ```
 
+More query snippets:
+
+- `references/rg-queries.md`
+
 ## Integration
 
 Prerequisites / follow-ups:
 - If you will run experiments or profiling, use `uv-hands-on-learning` after this analysis.
 - If you want to teach the repo’s internals, use `uv-tutorial-generator` and base it on the analysis + hands-on results.
 - If you add/change these workflows, run `uv-bootstrap-skill-linking` to keep relationships consistent.
+
+## Review policy
+
+Before calling a repo analysis “done”, use:
+
+- Review checklist: `review.md`
+- Pitfalls list: `pitfalls.md`

@@ -56,11 +56,17 @@ def main(argv: Optional[list[str]] = None) -> int:
             "",
             "## Prerequisites",
             "",
-            "- <what the reader should know>",
+            "- Python 3.10+.",
+            "- Any project-specific deps (fill these in).",
             "",
             "## Learning path",
             "",
-            f"- `{chapter}/README.md` — first chapter",
+            f"- `chapters/{chapter}/README.md` — first chapter",
+            "",
+            "## References",
+            "",
+            "- Repo analysis (recommended): TODO: link to the repo analysis you used.",
+            "- Hands-on evidence (recommended): TODO: link to the hands-on session report and evidence you used.",
             "",
         ]
     )
@@ -68,11 +74,11 @@ def main(argv: Optional[list[str]] = None) -> int:
 
     chapter_readme = "\n".join(
         [
-            f"# Chapter: {args.chapter}",
+            f"# 01 — {args.chapter}",
             "",
             "## Objectives",
             "",
-            "- <objective 1>",
+            "- TODO: Add 2–4 concrete learning objectives.",
             "",
             "## Conceptual model",
             "",
@@ -83,11 +89,26 @@ def main(argv: Optional[list[str]] = None) -> int:
             "",
             "## Code tour",
             "",
-            "- `<path>:<line>` — <what to read>",
+            "- `path/to/file.py:123` — TODO: what to read",
+            "",
+            "## Runnable example",
+            "",
+            "Command:",
+            "",
+            "```bash",
+            "python examples/your_example.py",
+            "```",
+            "",
+            "Expected output (captured from a real run):",
+            "",
+            "```text",
+            "TODO",
+            "```",
             "",
             "## Exercises",
             "",
-            "- <question>",
+            "1) TODO: exercise prompt",
+            "2) TODO: exercise prompt",
             "",
         ]
     )
@@ -100,4 +121,3 @@ def main(argv: Optional[list[str]] = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

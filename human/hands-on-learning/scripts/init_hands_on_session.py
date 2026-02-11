@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import datetime as _dt
 import re
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -51,13 +52,38 @@ def _run_capture(cmd: list[str]) -> str:
     try:
         return subprocess.check_output(cmd, text=True, stderr=subprocess.STDOUT).strip()
     except Exception as e:
-        return f"<unavailable: {e}>"
+        return f"[unavailable: {e}]"
 
 
 def _write_text(path: Path, content: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     if not path.exists():
         path.write_text(content, encoding="utf-8")
+
+def _write_text_overwrite(path: Path, content: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(content, encoding="utf-8")
+
+def _file_contains_any(path: Path, needles: list[str]) -> bool:
+    try:
+        text = path.read_text(encoding="utf-8")
+    except Exception:
+        return False
+    return any(n in text for n in needles)
+
+def _copy_skeleton(skeleton_dir: Path, dest: Path) -> None:
+    if not skeleton_dir.exists():
+        return
+    for src in skeleton_dir.rglob("*"):
+        rel = src.relative_to(skeleton_dir)
+        dst = dest / rel
+        if src.is_dir():
+            dst.mkdir(parents=True, exist_ok=True)
+            continue
+        if dst.exists():
+            continue
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(src, dst)
 
 
 def main(argv: Optional[list[str]] = None) -> int:
@@ -89,13 +115,52 @@ def main(argv: Optional[list[str]] = None) -> int:
     for d in [scripts_dir, results_dir, reports_dir]:
         d.mkdir(parents=True, exist_ok=True)
 
+    # Copy a session skeleton (reports + scripts + .gitignore) without overwriting existing files.
+    skill_dir = Path(__file__).resolve().parents[1]
+    skeleton_dir = skill_dir / "assets" / "session_skeleton"
+    _copy_skeleton(skeleton_dir, base)
+
+    # Fill common report files if they are still uninitialized skeleton templates.
+    head = _run_capture(["git", "-C", str(clone_path), "rev-parse", "HEAD"]).splitlines()[0] if (clone_path / ".git").exists() else ""
+    sha_short = head[:12] if head else ""
+
+    index_path = reports_dir / "INDEX.md"
+    if index_path.exists() and _file_contains_any(index_path, ["{session_name}", "{repo_url_or_path}"]):
+        index_md = "\n".join(
+            [
+                "# Hands-on session index",
+                "",
+                f"**Session:** `{session}`",
+                f"**Repo spec:** {args.repo}",
+                f"**Local clone:** {clone_path}",
+                f"**Commit:** {sha_short or 'unknown'}",
+                "",
+                "## Entry points",
+                "",
+                "- Repo analysis: `../../repo_analysis.md`",
+                "- Environment: `environment.md`",
+                "- Plan: `plan.md`",
+                "- Report: `report.md`",
+                "",
+                "## What to look at first",
+                "",
+                "1) `report.md` (what actually happened)",
+                "2) `environment.md` (is the setup credible?)",
+                "3) `plan.md` (what was intended?)",
+                "4) `results/` logs and traces (raw evidence; gitignored)",
+                "",
+            ]
+        )
+        _write_text_overwrite(index_path, index_md)
+
     env_md = "\n".join(
         [
             "# Environment",
             "",
-            f"**Date:** {_dt.date.today().isoformat()}",
+            f"**Captured:** {_dt.datetime.now().astimezone().strftime('%Y-%m-%d %H:%M:%S %Z')}",
             f"**Repo spec:** {args.repo}",
             f"**Local clone:** {clone_path}",
+            f"**Commit:** {sha_short or 'unknown'}",
             "",
             "## System",
             "",
@@ -116,25 +181,38 @@ def main(argv: Optional[list[str]] = None) -> int:
             "git: " + _run_capture(["git", "--version"]),
             "```",
             "",
+            "## Notes",
+            "",
+            "- This file is a quick snapshot created by the init script.",
+            "- For a more complete capture (including pip freeze), run: `bash scripts/capture_environment.sh`",
+            "- Raw evidence should live under `results/` (gitignored).",
+            "",
         ]
     )
-    _write_text(reports_dir / "environment.md", env_md)
+    env_path = reports_dir / "environment.md"
+    if (not env_path.exists()) or _file_contains_any(env_path, ["{repo_url_or_path}", "{git_sha_or_tag}"]):
+        _write_text_overwrite(env_path, env_md)
 
     plan_md = "\n".join(
         [
             "# Experiment plan",
             "",
-            "Link to repo analysis: `../repo_analysis.md` (one level up).",
+            "Link to repo analysis: `../../repo_analysis.md`.",
+            "",
+            "## Goal (one sentence)",
+            "",
+            "TODO",
             "",
             "## Hypotheses",
             "",
-            "- <what do you expect to be the bottleneck and why?>",
+            "- TODO: Write 1–3 falsifiable hypotheses (what you expect and why).",
             "",
             "## Workload matrix",
             "",
             "| Workload | Batch | Seq len | Dtype | Notes |",
             "| --- | --- | --- | --- | --- |",
-            "| <name> | <b> | <s> | <bf16/fp16/...> | <notes> |",
+            "| prefill | 1 | 1024 in / 1 out | fp16 | cold vs warm |",
+            "| decode | 16 | 128 in / 32 out | fp16 | kv_len sweep |",
             "",
             "## Metrics",
             "",
@@ -144,7 +222,8 @@ def main(argv: Optional[list[str]] = None) -> int:
             "",
             "## Baselines",
             "",
-            "- <baseline 1>",
+            "- Baseline A: smallest known-good example from the repo/docs.",
+            "- Baseline B: a tiny ungated model or microbench for fast iteration.",
             "",
             "## How to run",
             "",
@@ -152,7 +231,9 @@ def main(argv: Optional[list[str]] = None) -> int:
             "",
         ]
     )
-    _write_text(reports_dir / "plan.md", plan_md)
+    plan_path = reports_dir / "plan.md"
+    if (not plan_path.exists()) or _file_contains_any(plan_path, ["{goal}", "{hypothesis_1}"]):
+        _write_text_overwrite(plan_path, plan_md)
 
     report_md = "\n".join(
         [
@@ -162,19 +243,21 @@ def main(argv: Optional[list[str]] = None) -> int:
             "",
             "| Date | Command | Result summary | Evidence |",
             "| --- | --- | --- | --- |",
-            "| <YYYY-MM-DD> | <cmd> | <summary> | `results/<file>` |",
+            f"| {_dt.date.today().isoformat()} | TODO | TODO | `results/` |",
             "",
             "## Observations",
             "",
-            "- <event-level observations>",
+            "- TODO: Write event-level observations tied to evidence (log lines, trace files, metrics).",
             "",
             "## Next steps",
             "",
-            "- <next step>",
+            "- TODO: Add 3–5 concrete next steps (each with a command or file:line pointer).",
             "",
         ]
     )
-    _write_text(reports_dir / "report.md", report_md)
+    report_path = reports_dir / "report.md"
+    if (not report_path.exists()) or _file_contains_any(report_path, ["{command}", "{observation_1}"]):
+        _write_text_overwrite(report_path, report_md)
 
     print(f"CLONE={clone_path}")
     print(f"SESSION={base}")
@@ -186,4 +269,3 @@ def main(argv: Optional[list[str]] = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

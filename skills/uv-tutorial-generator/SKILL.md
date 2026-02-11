@@ -11,6 +11,13 @@ This skill converts:
 
 into a tutorial under `$HUMAN_MATERIAL_PATH/exercises/tutorials/<topic>/`.
 
+## Non-negotiables (requirements)
+
+- Tutorials must be runnable: at least one example per tutorial is executed and includes captured expected output.
+- Tutorials must be source-grounded: code tours include file:line pointers.
+- Exercises must be checkable: tasks include “what counts as correct”.
+- No placeholder markers like `<...>` may remain in tracked tutorial markdown.
+
 ## Output locations (pkbllm convention)
 
 - `$HUMAN_MATERIAL_PATH/exercises/tutorials/<topic_slug>/README.md`
@@ -50,6 +57,12 @@ Prefer compact visuals:
 - ASCII boxes for data structures
 - Small pseudocode blocks for loop nesting
 
+## Templates / assets
+
+- Chapter template: `assets/chapter_README_template.md`
+- Exercise template: `assets/exercise_template.md`
+- Exercise patterns: `references/exercise-patterns.md`
+
 ## Integration
 
 Prerequisites:
@@ -58,3 +71,8 @@ Prerequisites:
 
 Maintenance:
 - If you add/change these workflows, run `uv-bootstrap-skill-linking`.
+
+## Review policy
+
+- Review checklist: `review.md`
+- Common pitfalls: `pitfalls.md`

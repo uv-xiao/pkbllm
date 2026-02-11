@@ -61,10 +61,10 @@ def _git_head_sha(repo_path: Path) -> str:
 def _write_report_from_template(report_path: Path, *, repo_name: str, repo_spec: str, clone_path: Path, sha: str) -> None:
     template_path = Path(__file__).resolve().parents[1] / "assets" / "repo_analysis_template.md"
     text = template_path.read_text(encoding="utf-8")
-    text = text.replace("<repo name>", repo_name)
-    text = text.replace("<url>", repo_spec)
-    text = text.replace("<path>", str(clone_path))
-    text = text.replace("<sha>", sha)
+    text = text.replace("{repo_name}", repo_name)
+    text = text.replace("{repo_url_or_path}", repo_spec)
+    text = text.replace("{local_clone_path}", str(clone_path))
+    text = text.replace("{git_sha}", sha)
     report_path.parent.mkdir(parents=True, exist_ok=True)
     if not report_path.exists():
         report_path.write_text(text, encoding="utf-8")
@@ -102,4 +102,3 @@ def main(argv: Optional[list[str]] = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-
