@@ -53,6 +53,12 @@ Install all skills to Codex (project scope):
 npx skills add . -a codex --skill '*' -y
 ```
 
+Notes:
+
+- Always specify a single target agent via `-a` (e.g. `-a codex`). Avoid installing “for all agents”, which can create a pile of
+  local tool-state folders (now gitignored).
+- Prefer project-scope installs over global installs unless you intentionally want user-level state.
+
 See `INSTALL.md` for more install options and environment variables.
 
 ## How to use this repo (recommended workflow)

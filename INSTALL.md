@@ -16,11 +16,12 @@ Install all skills to Codex (project scope):
 npx skills add . -a codex --skill '*' -y
 ```
 
-Install all skills globally (user scope):
+Important:
 
-```bash
-npx skills add . -g -a codex --skill '*' -y
-```
+- Avoid installing “for all agents” (e.g., by omitting `-a ...`). Always target a single agent, like `-a codex`.
+- Prefer project-scope installs over global installs to avoid surprising cross-project changes.
+
+If you accidentally created local install folders (e.g. `.agent/`, `.agents/`, `.cursor/`, etc.), they are gitignored in this repo.
 
 ## Optional environment variables
 
