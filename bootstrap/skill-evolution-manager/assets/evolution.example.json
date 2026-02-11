@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "preferences": [
+    "Prefer project-scope skill installs; do not install for all agents by default."
+  ],
+  "fixes": [
+    "When a skill targets pkbllm canonical sources, never hand-edit `skills/`; update canonical and regenerate the mirror."
+  ],
+  "pitfalls": [
+    "Do not commit raw run artifacts under any `hands_on/**/results/`; keep only small excerpts under `evidence/`."
+  ],
+  "verification": [
+    "Run the smallest possible smoke command first and capture exact output into `evidence/`."
+  ],
+  "examples": [
+    {
+      "title": "Smoke: ensure a CLI is importable",
+      "command": "python -c \"import pkg; print(pkg.__version__)\"",
+      "expected": "0.1.2"
+    }
+  ]
+}
+

@@ -29,3 +29,18 @@ For the tutorial root `README.md`:
 - Examples are not runnable (missing deps, missing expected output, missing commands).
 - No file:line pointers (reader can’t connect concepts to code).
 - Exercises are vague (“read about X”) instead of tasks with acceptance criteria.
+
+## Quick placeholder scan (recommended)
+
+Run this against the tutorial folder before review:
+
+```bash
+rg -n \"\\{[a-zA-Z0-9_]+\\}|<\\.\\.\\.>\" \"$HUMAN_MATERIAL_PATH/exercises/tutorials/<topic_slug>/\" -S
+```
+
+## Subagent review gates (recommended)
+
+If you have subagent tooling available, use two review passes:
+
+1) **Spec compliance** using `reviewer-prompts/spec-compliance-reviewer.md`
+2) **Quality/teaching** using `reviewer-prompts/quality-reviewer.md`

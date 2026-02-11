@@ -96,3 +96,14 @@ Before calling a repo analysis “done”, use:
 
 - Review checklist: `review.md`
 - Pitfalls list: `pitfalls.md`
+
+### Subagent review gates (recommended)
+
+If you have subagent tooling available, add two explicit review gates before calling it “done”:
+
+1) **Gate 1 — Spec compliance**: verify the analysis meets the “Non-negotiables” and matches the template expectations (no placeholders, real file:line pointers, LLM sections present when applicable).
+2) **Gate 2 — Quality**: verify the document is readable, actionable, and would let a second engineer run and extend the repo without guesswork.
+
+Prompt templates:
+- Gate 1: `reviewer-prompts/spec-compliance-reviewer.md`
+- Gate 2: `reviewer-prompts/quality-reviewer.md`

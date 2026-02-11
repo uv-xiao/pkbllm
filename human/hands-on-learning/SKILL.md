@@ -105,6 +105,19 @@ Use the `uv-verification-before-completion` mindset: evidence before claims.
 - Benchmarking before you can run a minimal smoke.
 - Profiling a full server first (too much noise); start with microbenches.
 
+More pitfalls (expanded list): `pitfalls.md`
+
+### Subagent review gates (recommended)
+
+If you have subagent tooling available, add two explicit review gates before calling a session “done”:
+
+1) **Gate 1 — Spec compliance / evidence audit**: verify all required files exist, the report structure is complete, and every claim in `reports/report.md` points to evidence under `results/`.
+2) **Gate 2 — Quality**: verify the session is reproducible and actionable (a second engineer can rerun the workloads and learn from the report).
+
+Prompt templates:
+- Gate 1: `reviewer-prompts/spec-compliance-reviewer.md`
+- Gate 2: `reviewer-prompts/quality-reviewer.md`
+
 ## Modules (read when needed)
 
 - Environment checklist: `environment.md`

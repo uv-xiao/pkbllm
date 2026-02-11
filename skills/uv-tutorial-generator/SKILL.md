@@ -76,3 +76,14 @@ Maintenance:
 
 - Review checklist: `review.md`
 - Common pitfalls: `pitfalls.md`
+
+### Subagent review gates (recommended)
+
+If you have subagent tooling available, add two explicit review gates before calling a tutorial “done”:
+
+1) **Gate 1 — Spec compliance**: verify required elements exist (structure, runnable examples + expected output, file:line pointers, exercises with acceptance criteria) and no placeholders remain.
+2) **Gate 2 — Quality**: verify the tutorial is coherent, teaches the right mental model, and is runnable end-to-end by a reader.
+
+Prompt templates:
+- Gate 1: `reviewer-prompts/spec-compliance-reviewer.md`
+- Gate 2: `reviewer-prompts/quality-reviewer.md`

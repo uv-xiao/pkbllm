@@ -204,6 +204,12 @@
     "slug": "uv-sglang"
   },
   {
+    "canonical_path": "bootstrap/skill-evolution-manager",
+    "description": "Evolve skills safely from real session feedback by persisting structured learnings (`evolution.json`) and stitching an idempotent 'Learned' section into `SKILL.md`. Supports updating both PKB_PATH canonical skills and any local installed skill copies (best-effort) without installing for all agents.",
+    "name": "uv-skill-evolution-manager",
+    "slug": "uv-skill-evolution-manager"
+  },
+  {
     "canonical_path": "human/slider/slider-plan",
     "description": "Plan the slider workflow end-to-end by selecting which repo skills to run (content-prompts, styled-prompts, styled-artifacts) based on the user\u2019s starting input (materials or existing prompts) and requested output (content prompt, styled prompt, images, PDF, PPTX). Uses $HUMAN_MATERIAL_PATH/slides/<deck>/ as the working root.",
     "name": "uv-slider-plan",
