@@ -5,21 +5,23 @@ usage() {
   cat <<'EOF'
 pkb_skills_install.sh
 
-Download/clone pkbllm, remove any existing pkb (`uv-*`) skill installs, and install repo-locally to <pkb_dir>/.agent/skills.
+Download/clone pkbllm (skill source), remove any existing pkb (`uv-*`) skill installs, and install project-locally to <project_dir>/.agent/skills.
 
 Usage:
-  pkb_skills_install.sh [--repo-dir DIR] [--repo-url URL] [--ref REF] [--dev]
+  pkb_skills_install.sh [--project-dir DIR] [--repo-dir DIR] [--repo-url URL] [--ref REF] [--dev]
                        [--copy] [--no-skills-cli] [--clean-only] [--dry-run]
                        [--verbose] [--quiet] [--keep-logs] [--no-dev-update]
 
 Defaults:
   --repo-url   https://github.com/uv-xiao/pkbllm.git
-  --repo-dir   $XDG_DATA_HOME/pkbllm/pkbllm  (or ~/.local/share/pkbllm/pkbllm)
+  --repo-dir   $XDG_DATA_HOME/pkbllm/pkbllm  (or ~/.local/share/pkbllm/pkbllm)  [skill source]
+  --project-dir  current directory (pwd)  [installation target]
 
 Examples:
   pkb_skills_install.sh
+  pkb_skills_install.sh --project-dir ~/my-project
   pkb_skills_install.sh --repo-dir ~/src/pkbllm --ref main
-  pkb_skills_install.sh --dev --repo-dir ~/src/pkbllm
+  pkb_skills_install.sh --dev --repo-dir ~/src/pkbllm           # use existing pkb repo as source
   pkb_skills_install.sh --dev --repo-dir ~/src/pkbllm --no-dev-update
   pkb_skills_install.sh --dry-run
   pkb_skills_install.sh --copy
@@ -30,6 +32,7 @@ EOF
 
 repo_url="https://github.com/uv-xiao/pkbllm.git"
 repo_dir=""
+project_dir=""
 ref=""
 dev="0"
 copy="0"
@@ -43,6 +46,7 @@ no_dev_update="0"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
+    --project-dir) project_dir="$2"; shift 2 ;;
     --repo-url) repo_url="$2"; shift 2 ;;
     --repo-dir) repo_dir="$2"; shift 2 ;;
     --ref) ref="$2"; shift 2 ;;
@@ -65,6 +69,11 @@ if [[ -z "${repo_dir}" ]]; then
   repo_dir="${data_home}/pkbllm/pkbllm"
 fi
 
+if [[ -z "${project_dir}" ]]; then
+  project_dir="${PWD}"
+fi
+project_dir="$(cd "${project_dir}" && pwd -P)"
+
 need() {
   if ! command -v "$1" >/dev/null 2>&1; then
     echo "ERROR: missing required command: $1" >&2
@@ -77,7 +86,7 @@ need bash
 
 is_pkb_repo() {
   [[ -f "${repo_dir}/bootstrap/scripts/pkb_skills_reset.py" ]] && \
-    ( [[ -f "${repo_dir}/skills/manifest.json" ]] || [[ -d "${repo_dir}/bootstrap" ]] || [[ -d "${repo_dir}/knowledge" ]] )
+    ( [[ -d "${repo_dir}/bootstrap" ]] || [[ -d "${repo_dir}/knowledge" ]] || [[ -d "${repo_dir}/common" ]] )
 }
 
 log() {
@@ -151,7 +160,7 @@ if [[ "${dev}" == "1" ]]; then
   fi
 else
   log "repo url: ${repo_url}"
-  log "repo dir: ${repo_dir}"
+  log "pkb source repo dir: ${repo_dir}"
   if [[ -d "${repo_dir}/.git" ]]; then
     if [[ "${verbose}" == "1" ]]; then
       run git -C "${repo_dir}" fetch --all --tags --prune
@@ -186,9 +195,10 @@ else
 fi
 
 if [[ "${dry_run}" == "1" ]]; then
-  echo "[dry-run] would run: python3 ${repo_dir}/bootstrap/scripts/pkb_skills_reset.py --install-root ${repo_dir}/.agent/skills --force ..."
+  echo "[dry-run] would install into project dir: ${project_dir}"
+  echo "[dry-run] would run: python3 ${repo_dir}/bootstrap/scripts/pkb_skills_reset.py --project-root ${project_dir} --install-root ${project_dir}/.agent/skills --force ..."
   echo "pkbllm repo: ${repo_dir}"
-  echo "repo-local skills: ${repo_dir}/.agent/skills"
+  echo "project-local skills: ${project_dir}/.agent/skills"
   cat <<EOF
 
 Next steps (after running without --dry-run):
@@ -219,13 +229,14 @@ if [[ ! -f "${reset_py}" ]]; then
 fi
 
 args=()
-args+=(--install-root "${repo_dir}/.agent/skills" --force)
+args+=(--project-root "${project_dir}" --install-root "${project_dir}/.agent/skills" --force)
 if [[ "${copy}" == "1" ]]; then args+=(--copy); fi
 if [[ "${no_skills_cli}" == "1" ]]; then args+=(--no-skills-cli); fi
 if [[ "${clean_only}" == "1" ]]; then args+=(--clean-only); fi
 if [[ "${dry_run}" == "1" ]]; then args+=(--dry-run); fi
 
-log "cleaning existing installs and installing repo-local skills…"
+log "install target: ${project_dir}"
+log "cleaning existing installs and installing project-local skills…"
 if [[ "${verbose}" == "1" ]]; then
   "${py_exec[@]}" "${reset_py}" "${args[@]}" --verbose
 else
@@ -235,11 +246,38 @@ fi
 materials_dir="${XDG_DATA_HOME:-"$HOME/.local/share"}/pkbllm/human-materials"
 mkdir -p "${materials_dir}"/{slides,research,manuscripts,exercises} 2>/dev/null || true
 
+installed_dir="${project_dir}/.agent/skills"
+
+if [[ "${clean_only}" == "1" ]]; then
+  cat <<EOF
+Done.
+
+Cleanup complete. No skills were installed (--clean-only).
+
+PKB skill source repo:
+  ${repo_dir}
+
+Recommended environment variables:
+  export PKB_PATH="${repo_dir}"
+  export HUMAN_MATERIAL_PATH="${materials_dir}"
+
+Apply now (current shell):
+  export PKB_PATH="${repo_dir}"
+  export HUMAN_MATERIAL_PATH="${materials_dir}"
+
+EOF
+  finish
+  exit 0
+fi
+
 cat <<EOF
 Done.
 
-Installed pkb skills (repo-local):
-  ${repo_dir}/.agent/skills
+Installed pkb skills (project-local):
+  ${installed_dir}
+
+PKB skill source repo:
+  ${repo_dir}
 
 Recommended environment variables:
   export PKB_PATH="${repo_dir}"
@@ -263,12 +301,16 @@ Best practices:
   - Put generated human-facing outputs under \$HUMAN_MATERIAL_PATH/ (slides/, research/, manuscripts/, exercises/).
   - If you use a per-project agent config, prefer:
       \$HUMAN_MATERIAL_PATH/.agents/config.toml  (overrides) and ~/.agents/config.toml (fallback)
+  - Consider adding these to your project's .gitignore:
+      .agent/
+      .agents/
+      .codex/
 
 Optional verification:
   npx -y skills add "${repo_dir}" --list
 
 Optional (Skills CLI linking to Codex agent, project-scope):
-  cd "${repo_dir}" && npx -y skills add . -a codex --skill '*' -y
+  cd "${project_dir}" && npx -y skills add "${repo_dir}" -a codex --skill '*' -y
 EOF
 
 finish

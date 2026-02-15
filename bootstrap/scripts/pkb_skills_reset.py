@@ -153,7 +153,7 @@ def _home_skill_roots() -> list[Path]:
     return sorted(set(roots))
 
 
-def _default_cleanup_roots(repo_root: Path) -> list[Path]:
+def _default_cleanup_roots(project_root: Path) -> list[Path]:
     home = Path.home()
     roots: list[Path] = []
     # Home scope: keep conservative. Broader home cleanup is handled via `npx skills remove -g -a '*'`.
@@ -167,11 +167,11 @@ def _default_cleanup_roots(repo_root: Path) -> list[Path]:
     # Also sweep any `~/.*/skills` roots to catch agent-specific installs (e.g. `~/.cursor/skills`, `~/.claude/skills`, ...).
     roots.extend(_home_skill_roots())
 
-    # Repo scope: include common + tool-specific project dirs (mirrors `.gitignore` list).
-    repo_dot_dirs = set(_agent_dot_dirs_from_gitignore(repo_root))
+    # Project scope: include common + tool-specific project dirs (mirrors `.gitignore` list when present).
+    repo_dot_dirs = set(_agent_dot_dirs_from_gitignore(project_root))
     repo_dot_dirs.update({".codex", ".agents", ".agent"})
     for dot_dir in sorted(repo_dot_dirs):
-        roots.append(repo_root / dot_dir / "skills")
+        roots.append(project_root / dot_dir / "skills")
 
     return [p for i, p in enumerate(roots) if p not in roots[:i]]
 
@@ -297,9 +297,14 @@ def main(argv: list[str]) -> int:
         description="Remove existing pkbllm (`uv-*`) skills from common machine locations and install to this repo.",
     )
     parser.add_argument(
+        "--project-root",
+        default=str(repo_root),
+        help="Project root to clean/install into (default: this pkbllm repo root).",
+    )
+    parser.add_argument(
         "--install-root",
-        default=str(repo_root / ".agent" / "skills"),
-        help="Destination directory for repo-local install (default: <repo>/.agent/skills).",
+        default="",
+        help="Destination directory for project-local install (default: <project-root>/.agent/skills).",
     )
     parser.add_argument(
         "--copy",
@@ -353,10 +358,16 @@ def main(argv: list[str]) -> int:
             return
         print(msg, flush=True)
 
+    project_root = Path(args.project_root).expanduser().resolve()
+    install_root = (
+        Path(args.install_root).expanduser().resolve()
+        if args.install_root
+        else (project_root / ".agent" / "skills")
+    )
+
     skill_names = _scan_canonical_pkb_skill_names(repo_root)
     slugs_for_cleanup = sorted({_skill_slug(n) for n in skill_names})
-    cleanup_roots = _default_cleanup_roots(repo_root)
-    install_root = Path(args.install_root).expanduser().resolve()
+    cleanup_roots = _default_cleanup_roots(project_root)
 
     removed = 0
     if not args.skip_clean:
