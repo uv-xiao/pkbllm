@@ -228,7 +228,8 @@ def _run_update_skills_mirror(repo_root: Path, *, dry_run: bool) -> None:
     script = repo_root / "bootstrap" / "scripts" / "update_skills_mirror.py"
     if not script.exists():
         raise FileNotFoundError(f"Missing `{script}`.")
-    cmd = [sys.executable, str(script), "all"]
+    # Installation should only require generating `skills/` (not mutating README tables).
+    cmd = [sys.executable, str(script), "build-mirror"]
     if dry_run:
         print(f"[dry-run] run: {' '.join(cmd)}")
         return

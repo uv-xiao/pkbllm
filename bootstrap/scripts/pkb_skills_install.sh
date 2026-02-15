@@ -103,6 +103,7 @@ fi
 
 if [[ "${dry_run}" == "1" ]]; then
   echo "[dry-run] would run: python3 ${repo_dir}/bootstrap/scripts/pkb_skills_reset.py --install-root ${repo_dir}/.agent/skills --force ..."
+  echo "[dry-run] would run: python3 ${repo_dir}/bootstrap/scripts/update_skills_mirror.py build-mirror"
   echo "pkbllm repo: ${repo_dir}"
   echo "repo-local skills: ${repo_dir}/.agent/skills"
   cat <<EOF
@@ -124,6 +125,13 @@ fi
 if ! command -v "${py}" >/dev/null 2>&1; then
   echo "ERROR: need python3 (or python) to run pkb installer." >&2
   exit 1
+fi
+
+mirror_py="${repo_dir}/bootstrap/scripts/update_skills_mirror.py"
+if [[ -f "${mirror_py}" ]]; then
+  run "${py}" "${mirror_py}" build-mirror
+else
+  echo "WARNING: missing ${mirror_py}; will rely on existing skills mirror (skills/<slug>/)." >&2
 fi
 
 reset_py="${repo_dir}/bootstrap/scripts/pkb_skills_reset.py"
