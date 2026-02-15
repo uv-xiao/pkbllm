@@ -22,6 +22,12 @@ With options:
 curl -fsSL https://raw.githubusercontent.com/uv-xiao/pkbllm/main/bootstrap/scripts/pkb_skills_install.sh | bash -s -- --repo-dir ~/src/pkbllm --ref main
 ```
 
+Dev mode (use an existing local pkbllm checkout; no clone/pull):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/uv-xiao/pkbllm/main/bootstrap/scripts/pkb_skills_install.sh | bash -s -- --dev --repo-dir ~/src/pkbllm
+```
+
 ## Install with the Skills CLI
 
 List available skills:

@@ -8,7 +8,7 @@ pkb_skills_install.sh
 Download/clone pkbllm, remove any existing pkb (`uv-*`) skill installs, and install repo-locally to <pkb_dir>/.agent/skills.
 
 Usage:
-  pkb_skills_install.sh [--repo-dir DIR] [--repo-url URL] [--ref REF]
+  pkb_skills_install.sh [--repo-dir DIR] [--repo-url URL] [--ref REF] [--dev]
                        [--copy] [--no-skills-cli] [--clean-only] [--dry-run]
 
 Defaults:
@@ -18,6 +18,7 @@ Defaults:
 Examples:
   pkb_skills_install.sh
   pkb_skills_install.sh --repo-dir ~/src/pkbllm --ref main
+  pkb_skills_install.sh --dev --repo-dir ~/src/pkbllm
   pkb_skills_install.sh --dry-run
   pkb_skills_install.sh --copy
 EOF
@@ -26,6 +27,7 @@ EOF
 repo_url="https://github.com/uv-xiao/pkbllm.git"
 repo_dir=""
 ref=""
+dev="0"
 copy="0"
 no_skills_cli="0"
 clean_only="0"
@@ -36,6 +38,7 @@ while [[ $# -gt 0 ]]; do
     --repo-url) repo_url="$2"; shift 2 ;;
     --repo-dir) repo_dir="$2"; shift 2 ;;
     --ref) ref="$2"; shift 2 ;;
+    --dev) dev="1"; shift ;;
     --copy) copy="1"; shift ;;
     --no-skills-cli) no_skills_cli="1"; shift ;;
     --clean-only) clean_only="1"; shift ;;
@@ -60,6 +63,10 @@ need() {
 need git
 need bash
 
+is_pkb_repo() {
+  [[ -f "${repo_dir}/skills/manifest.json" ]] && [[ -f "${repo_dir}/bootstrap/scripts/pkb_skills_reset.py" ]]
+}
+
 run() {
   if [[ "${dry_run}" == "1" ]]; then
     echo "[dry-run] $*"
@@ -68,19 +75,29 @@ run() {
   "$@"
 }
 
-if [[ -d "${repo_dir}/.git" ]]; then
-  run git -C "${repo_dir}" fetch --all --tags --prune
+if [[ "${dev}" == "1" ]]; then
+  if ! is_pkb_repo; then
+    echo "ERROR: --dev requires an existing pkbllm checkout at --repo-dir: ${repo_dir}" >&2
+    echo "Expected files:" >&2
+    echo "  ${repo_dir}/skills/manifest.json" >&2
+    echo "  ${repo_dir}/bootstrap/scripts/pkb_skills_reset.py" >&2
+    exit 1
+  fi
 else
-  run mkdir -p "$(dirname "${repo_dir}")"
-  run git clone "${repo_url}" "${repo_dir}"
-fi
+  if [[ -d "${repo_dir}/.git" ]]; then
+    run git -C "${repo_dir}" fetch --all --tags --prune
+  else
+    run mkdir -p "$(dirname "${repo_dir}")"
+    run git clone "${repo_url}" "${repo_dir}"
+  fi
 
-if [[ -n "${ref}" ]]; then
-  run git -C "${repo_dir}" checkout "${ref}"
-else
-  # Best-effort update on the default branch.
-  run git -C "${repo_dir}" checkout main || true
-  run git -C "${repo_dir}" pull --ff-only || true
+  if [[ -n "${ref}" ]]; then
+    run git -C "${repo_dir}" checkout "${ref}"
+  else
+    # Best-effort update on the default branch.
+    run git -C "${repo_dir}" checkout main || true
+    run git -C "${repo_dir}" pull --ff-only || true
+  fi
 fi
 
 if [[ "${dry_run}" == "1" ]]; then
