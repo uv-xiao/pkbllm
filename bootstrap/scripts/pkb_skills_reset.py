@@ -345,18 +345,12 @@ def main(argv: list[str]) -> int:
     if not args.skip_clean:
         if not args.no_skills_cli:
             if not args.quiet and args.verbose:
-                log("[pkb-reset] removing installed pkb skills via Skills CLI (global + project)")
+                log("[pkb-reset] removing installed pkb skills via Skills CLI (global)")
+                log("[pkb-reset] NOTE: project-scope `skills remove` is disabled to avoid deleting this repo's `skills/<slug>/` mirror.")
             _skills_cli_remove(
                 repo_root=repo_root,
                 skill_names=skill_names,
                 global_scope=True,
-                dry_run=args.dry_run,
-                verbose=(args.verbose and not args.quiet),
-            )
-            _skills_cli_remove(
-                repo_root=repo_root,
-                skill_names=skill_names,
-                global_scope=False,
                 dry_run=args.dry_run,
                 verbose=(args.verbose and not args.quiet),
             )
