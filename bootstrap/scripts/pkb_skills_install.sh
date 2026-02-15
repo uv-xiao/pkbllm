@@ -64,7 +64,8 @@ need git
 need bash
 
 is_pkb_repo() {
-  [[ -f "${repo_dir}/skills/manifest.json" ]] && [[ -f "${repo_dir}/bootstrap/scripts/pkb_skills_reset.py" ]]
+  [[ -f "${repo_dir}/bootstrap/scripts/pkb_skills_reset.py" ]] && \
+    ( [[ -f "${repo_dir}/skills/manifest.json" ]] || [[ -d "${repo_dir}/bootstrap" ]] || [[ -d "${repo_dir}/knowledge" ]] )
 }
 
 run() {

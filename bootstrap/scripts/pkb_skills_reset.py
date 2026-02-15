@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+from dataclasses import dataclass
 import json
 import os
 import shutil
@@ -14,34 +15,96 @@ def _repo_root() -> Path:
     # bootstrap/scripts/<this_file>
     return Path(__file__).resolve().parents[2]
 
+@dataclass(frozen=True)
+class SkillSpec:
+    name: str
+    slug: str
+    canonical_path: str | None = None
 
-def _load_pkb_skill_slugs(repo_root: Path) -> list[str]:
+
+def _parse_skill_name(skill_md: Path) -> str | None:
+    try:
+        text = skill_md.read_text(encoding="utf-8")
+    except OSError:
+        return None
+
+    lines = text.splitlines()
+    if not lines or lines[0].strip() != "---":
+        return None
+
+    for line in lines[1:]:
+        if line.strip() == "---":
+            break
+        if not line.strip() or line.lstrip().startswith("#"):
+            continue
+        if not line.startswith("name:"):
+            continue
+        value = line.split(":", 1)[1].strip()
+        if value.startswith(("'", '"')) and value.endswith(("'", '"')) and len(value) >= 2:
+            value = value[1:-1]
+        return value.strip() or None
+
+    return None
+
+
+def _discover_uv_skills_from_canonical(repo_root: Path) -> list[SkillSpec]:
+    roots = ["common", "knowledge", "productivity", "human", "bootstrap"]
+    specs: dict[str, SkillSpec] = {}
+
+    for root in roots:
+        root_path = repo_root / root
+        if not root_path.is_dir():
+            continue
+        for skill_md in root_path.rglob("SKILL.md"):
+            name = _parse_skill_name(skill_md)
+            if not name or not name.startswith("uv-"):
+                continue
+            canonical_path = str(skill_md.parent.relative_to(repo_root))
+            specs[name] = SkillSpec(name=name, slug=name, canonical_path=canonical_path)
+
+    return [specs[k] for k in sorted(specs)]
+
+
+def _load_pkb_skills(repo_root: Path) -> list[SkillSpec]:
     manifest_path = repo_root / "skills" / "manifest.json"
     if not manifest_path.exists():
-        raise FileNotFoundError(
-            f"Missing `{manifest_path}`. Run `python bootstrap/scripts/update_skills_mirror.py all` first."
-        )
+        # Don't assume a generated mirror exists in the checkout.
+        specs = _discover_uv_skills_from_canonical(repo_root)
+        if not specs:
+            raise FileNotFoundError(
+                f"Missing `{manifest_path}` and no `uv-*` skills found under canonical folders."
+            )
+        return specs
 
     data = json.loads(manifest_path.read_text(encoding="utf-8"))
     if not isinstance(data, list):
         raise ValueError(f"Unexpected manifest format in `{manifest_path}` (expected JSON list).")
 
-    slugs: list[str] = []
+    specs: list[SkillSpec] = []
     for item in data:
         if not isinstance(item, dict):
             continue
-        slug = item.get("slug")
         name = item.get("name")
-        if not isinstance(slug, str) or not isinstance(name, str):
+        slug = item.get("slug")
+        canonical_path = item.get("canonical_path")
+        if not isinstance(name, str):
             continue
         if not name.startswith("uv-"):
             continue
-        slugs.append(slug)
+        if not isinstance(slug, str) or not slug:
+            slug = name
+        if not isinstance(canonical_path, str) or not canonical_path:
+            canonical_path = None
+        specs.append(SkillSpec(name=name, slug=slug, canonical_path=canonical_path))
 
-    slugs = sorted(set(slugs))
-    if not slugs:
+    unique: dict[str, SkillSpec] = {}
+    for spec in specs:
+        unique[spec.name] = spec
+
+    specs = [unique[k] for k in sorted(unique)]
+    if not specs:
         raise ValueError(f"No `uv-` skills found in `{manifest_path}`.")
-    return slugs
+    return specs
 
 
 def _agent_dot_dirs_from_gitignore(repo_root: Path) -> list[str]:
@@ -123,7 +186,7 @@ def _chunk(items: list[str], size: int) -> list[list[str]]:
     return [items[i : i + size] for i in range(0, len(items), size)]
 
 
-def _skills_cli_remove(*, repo_root: Path, slugs: list[str], global_scope: bool, dry_run: bool) -> None:
+def _skills_cli_remove(*, repo_root: Path, skill_names: list[str], global_scope: bool, dry_run: bool) -> None:
     if _which("npx") is None:
         print("NOTE: `npx` not found; skipping Skills CLI cleanup.")
         return
@@ -135,8 +198,8 @@ def _skills_cli_remove(*, repo_root: Path, slugs: list[str], global_scope: bool,
     if global_scope:
         base_cmd.insert(4, "-g")
 
-    for slugs_chunk in _chunk(slugs, 20):
-        cmd = [*base_cmd, "--skill", *slugs_chunk]
+    for names_chunk in _chunk(skill_names, 20):
+        cmd = [*base_cmd, "--skill", *names_chunk]
         if dry_run:
             scope = "global" if global_scope else "project"
             print(f"[dry-run] run ({scope}): {' '.join(cmd)}")
@@ -194,6 +257,21 @@ def _symlink(src: Path, dest: Path, *, dry_run: bool) -> None:
         return
     dest.symlink_to(rel_src)
 
+def _skill_dirnames(spec: SkillSpec) -> set[str]:
+    names = {spec.slug, spec.name}
+    return {n for n in names if n}
+
+
+def _resolve_skill_source(repo_root: Path, spec: SkillSpec) -> Path | None:
+    if spec.canonical_path:
+        canonical = repo_root / spec.canonical_path
+        if canonical.exists():
+            return canonical
+    mirror = repo_root / "skills" / spec.slug
+    if mirror.exists():
+        return mirror
+    return None
+
 
 def main(argv: list[str]) -> int:
     repo_root = _repo_root()
@@ -238,19 +316,21 @@ def main(argv: list[str]) -> int:
     )
     args = parser.parse_args(argv)
 
-    slugs = _load_pkb_skill_slugs(repo_root)
+    specs = _load_pkb_skills(repo_root)
+    skill_names = [s.name for s in specs]
     cleanup_roots = _default_cleanup_roots(repo_root)
     install_root = Path(args.install_root).expanduser().resolve()
 
     removed = 0
     if not args.skip_clean:
         if not args.no_skills_cli:
-            _skills_cli_remove(repo_root=repo_root, slugs=slugs, global_scope=True, dry_run=args.dry_run)
-            _skills_cli_remove(repo_root=repo_root, slugs=slugs, global_scope=False, dry_run=args.dry_run)
+            _skills_cli_remove(repo_root=repo_root, skill_names=skill_names, global_scope=True, dry_run=args.dry_run)
+            _skills_cli_remove(repo_root=repo_root, skill_names=skill_names, global_scope=False, dry_run=args.dry_run)
 
         for root in cleanup_roots:
-            for slug in slugs:
-                removed += int(_rm_path(root / slug, dry_run=args.dry_run))
+            for spec in specs:
+                for dirname in _skill_dirnames(spec):
+                    removed += int(_rm_path(root / dirname, dry_run=args.dry_run))
 
     if args.clean_only:
         print(f"Done. Removed {removed} existing installs.")
@@ -259,16 +339,20 @@ def main(argv: list[str]) -> int:
     _ensure_dir(install_root, dry_run=args.dry_run)
 
     installed = 0
-    for slug in slugs:
-        src = repo_root / "skills" / slug
-        if not src.exists():
-            print(
-                f"ERROR: missing source `{src}`. Run `python bootstrap/scripts/update_skills_mirror.py all`.",
-                file=sys.stderr,
-            )
+    for spec in specs:
+        src = _resolve_skill_source(repo_root, spec)
+        if src is None:
+            mirror = repo_root / "skills" / spec.slug
+            canonical = repo_root / spec.canonical_path if spec.canonical_path else None
+            parts = [f"ERROR: cannot find source for `{spec.name}`."]
+            parts.append(f"- expected canonical: `{canonical}`" if canonical else "- canonical: (unknown)")
+            parts.append(f"- expected mirror: `{mirror}`")
+            parts.append("If you are on a partial checkout, pull full repo contents. If needed, regenerate mirror:")
+            parts.append("  python bootstrap/scripts/update_skills_mirror.py all")
+            print("\n".join(parts), file=sys.stderr)
             return 2
 
-        dest = install_root / slug
+        dest = install_root / spec.slug
         if dest.exists() or dest.is_symlink():
             if not args.force:
                 print(f"skip (exists): {dest}")
