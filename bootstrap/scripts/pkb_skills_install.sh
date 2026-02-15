@@ -238,12 +238,31 @@ mkdir -p "${materials_dir}"/{slides,research,manuscripts,exercises} 2>/dev/null 
 cat <<EOF
 Done.
 
-Installed repo-local skills:
+Installed pkb skills (repo-local):
   ${repo_dir}/.agent/skills
 
-Recommended environment variables (add to ~/.zshrc or ~/.bashrc):
+Recommended environment variables:
   export PKB_PATH="${repo_dir}"
   export HUMAN_MATERIAL_PATH="${materials_dir}"
+
+Apply now (current shell):
+  export PKB_PATH="${repo_dir}"
+  export HUMAN_MATERIAL_PATH="${materials_dir}"
+
+Persist (choose one):
+  echo 'export PKB_PATH="${repo_dir}"' >> ~/.zshrc
+  echo 'export HUMAN_MATERIAL_PATH="${materials_dir}"' >> ~/.zshrc
+  # or:
+  echo 'export PKB_PATH="${repo_dir}"' >> ~/.bashrc
+  echo 'export HUMAN_MATERIAL_PATH="${materials_dir}"' >> ~/.bashrc
+
+Best practices:
+  - Keep skill sources in this repo; don't hand-edit \`skills/\` (it's generated).
+  - Refresh generated mirror when updating the repo:
+      python "${repo_dir}/bootstrap/scripts/update_skills_mirror.py" all
+  - Put generated human-facing outputs under \$HUMAN_MATERIAL_PATH/ (slides/, research/, manuscripts/, exercises/).
+  - If you use a per-project agent config, prefer:
+      \$HUMAN_MATERIAL_PATH/.agents/config.toml  (overrides) and ~/.agents/config.toml (fallback)
 
 Optional verification:
   npx -y skills add "${repo_dir}" --list
