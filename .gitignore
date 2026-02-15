@@ -4,6 +4,11 @@ __pycache__/
 *.pyc
 .DS_Store
 
+# Generated skills mirror (created by `python bootstrap/scripts/update_skills_mirror.py all`)
+skills/*
+!skills/README.md
+!skills/manifest.json
+
 # Local agent skill installs / tool state (untracked; never commit)
 .adal/
 .agent/

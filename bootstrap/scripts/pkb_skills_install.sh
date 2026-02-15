@@ -103,6 +103,7 @@ fi
 
 if [[ "${dry_run}" == "1" ]]; then
   echo "[dry-run] would run: python3 ${repo_dir}/bootstrap/scripts/pkb_skills_reset.py --install-root ${repo_dir}/.agent/skills --force ..."
+  echo "[dry-run] would run: python3 ${repo_dir}/bootstrap/scripts/update_skills_mirror.py all"
   echo "pkbllm repo: ${repo_dir}"
   echo "repo-local skills: ${repo_dir}/.agent/skills"
   cat <<EOF
@@ -126,6 +127,8 @@ if ! command -v "${py}" >/dev/null 2>&1; then
   exit 1
 fi
 
+run "${py}" "${repo_dir}/bootstrap/scripts/update_skills_mirror.py" all
+
 reset_py="${repo_dir}/bootstrap/scripts/pkb_skills_reset.py"
 if [[ ! -f "${reset_py}" ]]; then
   echo "ERROR: expected ${reset_py} to exist after clone." >&2
@@ -133,7 +136,7 @@ if [[ ! -f "${reset_py}" ]]; then
 fi
 
 args=()
-args+=(--install-root "${repo_dir}/.agent/skills" --force)
+args+=(--install-root "${repo_dir}/.agent/skills" --force --skip-mirror-update)
 if [[ "${copy}" == "1" ]]; then args+=(--copy); fi
 if [[ "${no_skills_cli}" == "1" ]]; then args+=(--no-skills-cli); fi
 if [[ "${clean_only}" == "1" ]]; then args+=(--clean-only); fi
