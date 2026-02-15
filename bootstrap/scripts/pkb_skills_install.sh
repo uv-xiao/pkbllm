@@ -10,6 +10,7 @@ Download/clone pkbllm, remove any existing pkb (`uv-*`) skill installs, and inst
 Usage:
   pkb_skills_install.sh [--repo-dir DIR] [--repo-url URL] [--ref REF] [--dev]
                        [--copy] [--no-skills-cli] [--clean-only] [--dry-run]
+                       [--verbose] [--quiet] [--keep-logs]
 
 Defaults:
   --repo-url   https://github.com/uv-xiao/pkbllm.git
@@ -21,6 +22,8 @@ Examples:
   pkb_skills_install.sh --dev --repo-dir ~/src/pkbllm
   pkb_skills_install.sh --dry-run
   pkb_skills_install.sh --copy
+  pkb_skills_install.sh --verbose
+  pkb_skills_install.sh --keep-logs
 EOF
 }
 
@@ -32,6 +35,9 @@ copy="0"
 no_skills_cli="0"
 clean_only="0"
 dry_run="0"
+verbose="0"
+quiet="0"
+keep_logs="0"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -43,6 +49,9 @@ while [[ $# -gt 0 ]]; do
     --no-skills-cli) no_skills_cli="1"; shift ;;
     --clean-only) clean_only="1"; shift ;;
     --dry-run) dry_run="1"; shift ;;
+    --verbose) verbose="1"; shift ;;
+    --quiet) quiet="1"; shift ;;
+    --keep-logs) keep_logs="1"; shift ;;
     -h|--help) usage; exit 0 ;;
     *) echo "Unknown arg: $1" >&2; usage; exit 2 ;;
   esac
@@ -68,6 +77,13 @@ is_pkb_repo() {
     ( [[ -f "${repo_dir}/skills/manifest.json" ]] || [[ -d "${repo_dir}/bootstrap" ]] || [[ -d "${repo_dir}/knowledge" ]] )
 }
 
+log() {
+  if [[ "${quiet}" == "1" ]]; then
+    return 0
+  fi
+  echo "[pkb-install] $*"
+}
+
 run() {
   if [[ "${dry_run}" == "1" ]]; then
     echo "[dry-run] $*"
@@ -75,6 +91,29 @@ run() {
   fi
   "$@"
 }
+
+workdir="$(mktemp -d)"
+log_file="${workdir}/pkb_install.log"
+
+finish() {
+  if [[ "${keep_logs}" == "1" ]]; then
+    log "logs kept at: ${log_file}"
+    return 0
+  fi
+  rm -rf "${workdir}" >/dev/null 2>&1 || true
+}
+
+on_err() {
+  echo "ERROR: installation failed." >&2
+  echo "Log file: ${log_file}" >&2
+  if [[ -f "${log_file}" ]]; then
+    echo "---- last 200 log lines ----" >&2
+    tail -n 200 "${log_file}" >&2 || true
+  fi
+  finish
+}
+
+trap on_err ERR
 
 if [[ "${dev}" == "1" ]]; then
   if ! is_pkb_repo; then
@@ -84,20 +123,46 @@ if [[ "${dev}" == "1" ]]; then
     echo "  ${repo_dir}/bootstrap/scripts/pkb_skills_reset.py" >&2
     exit 1
   fi
+  if command -v git >/dev/null 2>&1 && [[ -d "${repo_dir}/.git" ]]; then
+    head_ref="$(git -C "${repo_dir}" rev-parse --short HEAD 2>/dev/null || true)"
+    dirty="$(git -C "${repo_dir}" status --porcelain 2>/dev/null | wc -l | tr -d ' ' || true)"
+    log "dev mode: using existing repo: ${repo_dir} (HEAD=${head_ref:-unknown}, dirty_files=${dirty:-unknown})"
+  else
+    log "dev mode: using existing repo: ${repo_dir}"
+  fi
 else
+  log "repo url: ${repo_url}"
+  log "repo dir: ${repo_dir}"
   if [[ -d "${repo_dir}/.git" ]]; then
-    run git -C "${repo_dir}" fetch --all --tags --prune
+    if [[ "${verbose}" == "1" ]]; then
+      run git -C "${repo_dir}" fetch --all --tags --prune
+    else
+      run git -C "${repo_dir}" fetch --all --tags --prune >>"${log_file}" 2>&1
+    fi
   else
     run mkdir -p "$(dirname "${repo_dir}")"
-    run git clone "${repo_url}" "${repo_dir}"
+    if [[ "${verbose}" == "1" ]]; then
+      run git clone "${repo_url}" "${repo_dir}"
+    else
+      run git clone "${repo_url}" "${repo_dir}" >>"${log_file}" 2>&1
+    fi
   fi
 
   if [[ -n "${ref}" ]]; then
-    run git -C "${repo_dir}" checkout "${ref}"
+    if [[ "${verbose}" == "1" ]]; then
+      run git -C "${repo_dir}" checkout "${ref}"
+    else
+      run git -C "${repo_dir}" checkout "${ref}" >>"${log_file}" 2>&1
+    fi
   else
     # Best-effort update on the default branch.
-    run git -C "${repo_dir}" checkout main || true
-    run git -C "${repo_dir}" pull --ff-only || true
+    if [[ "${verbose}" == "1" ]]; then
+      run git -C "${repo_dir}" checkout main || true
+      run git -C "${repo_dir}" pull --ff-only || true
+    else
+      (run git -C "${repo_dir}" checkout main || true) >>"${log_file}" 2>&1
+      (run git -C "${repo_dir}" pull --ff-only || true) >>"${log_file}" 2>&1
+    fi
   fi
 fi
 
@@ -128,10 +193,50 @@ if ! command -v "${py}" >/dev/null 2>&1; then
 fi
 
 mirror_py="${repo_dir}/bootstrap/scripts/update_skills_mirror.py"
+mirror_built="0"
 if [[ -f "${mirror_py}" ]]; then
-  run "${py}" "${mirror_py}" build-mirror
+  log "building skills mirror (skills/<slug>/)…"
+  if [[ "${verbose}" == "1" ]]; then
+    "${py}" "${mirror_py}" build-mirror
+  else
+    "${py}" "${mirror_py}" build-mirror >>"${log_file}" 2>&1
+  fi
+  mirror_built="1"
 else
-  echo "WARNING: missing ${mirror_py}; will rely on existing skills mirror (skills/<slug>/)." >&2
+  # If the mirror script is missing, installation can only proceed if the mirror already exists.
+  if [[ -d "${repo_dir}/skills" ]] && ls "${repo_dir}/skills"/*/SKILL.md >/dev/null 2>&1; then
+    echo "WARNING: missing ${mirror_py}; using existing skills mirror under ${repo_dir}/skills/." >&2
+  else
+    echo "ERROR: missing ${mirror_py} and no existing ${repo_dir}/skills/<slug>/ mirror found." >&2
+    echo "Fix: ensure ${repo_dir} is a full pkbllm checkout (or re-run without --dev to clone it)." >&2
+    exit 1
+  fi
+fi
+
+# Sanity check: the mirror should contain directories for the slugs listed in `skills/manifest.json`.
+if [[ -f "${repo_dir}/skills/manifest.json" ]]; then
+  first_slug="$("${py}" - <<PY
+import json
+import sys
+from pathlib import Path
+
+p = Path(r"""${repo_dir}""") / "skills" / "manifest.json"
+try:
+    data = json.loads(p.read_text(encoding="utf-8"))
+except Exception:
+    print("")
+    sys.exit(0)
+
+slugs = [x.get("slug") for x in data if isinstance(x, dict) and isinstance(x.get("slug"), str)]
+print(slugs[0] if slugs else "")
+PY
+)"
+  if [[ -n "${first_slug}" ]] && [[ ! -d "${repo_dir}/skills/${first_slug}" ]]; then
+    echo "ERROR: skills mirror sanity check failed: missing ${repo_dir}/skills/${first_slug}/" >&2
+    echo "Log file: ${log_file}" >&2
+    echo "Fix: run: python ${repo_dir}/bootstrap/scripts/update_skills_mirror.py all" >&2
+    exit 1
+  fi
 fi
 
 reset_py="${repo_dir}/bootstrap/scripts/pkb_skills_reset.py"
@@ -147,7 +252,12 @@ if [[ "${no_skills_cli}" == "1" ]]; then args+=(--no-skills-cli); fi
 if [[ "${clean_only}" == "1" ]]; then args+=(--clean-only); fi
 if [[ "${dry_run}" == "1" ]]; then args+=(--dry-run); fi
 
-run "${py}" "${reset_py}" "${args[@]}"
+log "cleaning existing installs and installing repo-local skills…"
+if [[ "${verbose}" == "1" ]]; then
+  "${py}" "${reset_py}" "${args[@]}"
+else
+  "${py}" "${reset_py}" "${args[@]}" >>"${log_file}" 2>&1
+fi
 
 materials_dir="${XDG_DATA_HOME:-"$HOME/.local/share"}/pkbllm/human-materials"
 mkdir -p "${materials_dir}"/{slides,research,manuscripts,exercises} 2>/dev/null || true
@@ -168,3 +278,5 @@ Optional verification:
 Optional (Skills CLI linking to Codex agent, project-scope):
   cd "${repo_dir}" && npx -y skills add . -a codex --skill '*' -y
 EOF
+
+finish

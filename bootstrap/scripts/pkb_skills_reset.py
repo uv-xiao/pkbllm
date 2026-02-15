@@ -18,7 +18,7 @@ def _load_pkb_skill_slugs(repo_root: Path) -> list[str]:
     manifest_path = repo_root / "skills" / "manifest.json"
     if not manifest_path.exists():
         raise FileNotFoundError(
-            f"Missing `{manifest_path}`. Run `python bootstrap/scripts/update_skills_mirror.py all` first."
+            f"Missing `{manifest_path}`. Run `python bootstrap/scripts/update_skills_mirror.py build-mirror` first."
         )
 
     data = json.loads(manifest_path.read_text(encoding="utf-8"))
@@ -52,7 +52,7 @@ def _load_pkb_skill_names(repo_root: Path) -> list[str]:
     manifest_path = repo_root / "skills" / "manifest.json"
     if not manifest_path.exists():
         raise FileNotFoundError(
-            f"Missing `{manifest_path}`. Run `python bootstrap/scripts/update_skills_mirror.py all` first."
+            f"Missing `{manifest_path}`. Run `python bootstrap/scripts/update_skills_mirror.py build-mirror` first."
         )
 
     data = json.loads(manifest_path.read_text(encoding="utf-8"))
@@ -153,7 +153,9 @@ def _chunk(items: list[str], size: int) -> list[list[str]]:
     return [items[i : i + size] for i in range(0, len(items), size)]
 
 
-def _skills_cli_remove(*, repo_root: Path, skill_names: list[str], global_scope: bool, dry_run: bool) -> None:
+def _skills_cli_remove(
+    *, repo_root: Path, skill_names: list[str], global_scope: bool, dry_run: bool, verbose: bool
+) -> None:
     if _which("npx") is None:
         print("NOTE: `npx` not found; skipping Skills CLI cleanup.")
         return
@@ -181,7 +183,7 @@ def _skills_cli_remove(*, repo_root: Path, skill_names: list[str], global_scope:
             check=False,
         )
         output = (result.stdout or "").strip()
-        if output:
+        if output and (verbose or result.returncode != 0):
             print(output)
         if result.returncode != 0:
             scope = "global" if global_scope else "project"
@@ -235,6 +237,27 @@ def _run_update_skills_mirror(repo_root: Path, *, dry_run: bool) -> None:
         return
     subprocess.run(cmd, cwd=str(repo_root), check=True)
 
+def _skills_mirror_dir_count(repo_root: Path) -> int:
+    skills_root = repo_root / "skills"
+    if not skills_root.is_dir():
+        return 0
+    keep = {"README.md", "manifest.json"}
+    count = 0
+    for entry in skills_root.iterdir():
+        if entry.name in keep:
+            continue
+        if entry.is_dir():
+            count += 1
+    return count
+
+
+def _missing_skill_sources(repo_root: Path, slugs: list[str]) -> list[str]:
+    missing: list[str] = []
+    for slug in slugs:
+        if not (repo_root / "skills" / slug).exists():
+            missing.append(slug)
+    return missing
+
 
 def main(argv: list[str]) -> int:
     repo_root = _repo_root()
@@ -260,12 +283,22 @@ def main(argv: list[str]) -> int:
     parser.add_argument(
         "--skip-mirror-update",
         action="store_true",
-        help="Skip `python bootstrap/scripts/update_skills_mirror.py all` before installation.",
+        help="Skip `python bootstrap/scripts/update_skills_mirror.py build-mirror` before installation.",
     )
     parser.add_argument(
         "--no-skills-cli",
         action="store_true",
         help="Disable using `npx skills remove` for cleanup (filesystem-only cleanup).",
+    )
+    parser.add_argument(
+        "--verbose",
+        action="store_true",
+        help="Print verbose logs (includes Skills CLI output).",
+    )
+    parser.add_argument(
+        "--quiet",
+        action="store_true",
+        help="Suppress non-error output (implies --no-skills-cli output suppression).",
     )
     parser.add_argument(
         "--clean-only",
@@ -284,7 +317,13 @@ def main(argv: list[str]) -> int:
     )
     args = parser.parse_args(argv)
 
+    def log(msg: str) -> None:
+        if args.quiet:
+            return
+        print(msg)
+
     if not args.skip_mirror_update and not args.clean_only:
+        log(f"[pkb-reset] building skills mirror via `update_skills_mirror.py build-mirror` (python={sys.executable})")
         _run_update_skills_mirror(repo_root, dry_run=args.dry_run)
 
     slugs = _load_pkb_skill_slugs(repo_root)
@@ -292,11 +331,35 @@ def main(argv: list[str]) -> int:
     cleanup_roots = _default_cleanup_roots(repo_root)
     install_root = Path(args.install_root).expanduser().resolve()
 
+    if not args.clean_only:
+        mirror_dirs = _skills_mirror_dir_count(repo_root)
+        log(f"[pkb-reset] skills mirror dirs: {mirror_dirs} (expected {len(slugs)})")
+        missing = _missing_skill_sources(repo_root, slugs)
+        if missing and not args.dry_run:
+            print("[pkb-reset] ERROR: skills mirror is incomplete after build-mirror.", file=sys.stderr)
+            print(f"[pkb-reset] missing sources (first 10): {', '.join(missing[:10])}", file=sys.stderr)
+            print("[pkb-reset] hint: your repo may be incomplete (sparse/partial checkout).", file=sys.stderr)
+            return 2
+
     removed = 0
     if not args.skip_clean:
         if not args.no_skills_cli:
-            _skills_cli_remove(repo_root=repo_root, skill_names=skill_names, global_scope=True, dry_run=args.dry_run)
-            _skills_cli_remove(repo_root=repo_root, skill_names=skill_names, global_scope=False, dry_run=args.dry_run)
+            if not args.quiet and args.verbose:
+                log("[pkb-reset] removing installed pkb skills via Skills CLI (global + project)")
+            _skills_cli_remove(
+                repo_root=repo_root,
+                skill_names=skill_names,
+                global_scope=True,
+                dry_run=args.dry_run,
+                verbose=(args.verbose and not args.quiet),
+            )
+            _skills_cli_remove(
+                repo_root=repo_root,
+                skill_names=skill_names,
+                global_scope=False,
+                dry_run=args.dry_run,
+                verbose=(args.verbose and not args.quiet),
+            )
 
         for root in cleanup_roots:
             for slug in slugs:
@@ -305,7 +368,7 @@ def main(argv: list[str]) -> int:
                 removed += int(_rm_path(root / name, dry_run=args.dry_run))
 
     if args.clean_only:
-        print(f"Done. Removed {removed} existing installs.")
+        log(f"Done. Removed {removed} existing installs.")
         return 0
 
     _ensure_dir(install_root, dry_run=args.dry_run)
@@ -315,10 +378,10 @@ def main(argv: list[str]) -> int:
         src = repo_root / "skills" / slug
         if not src.exists():
             if args.dry_run:
-                print(f"[dry-run] missing source {src} (would be created by `update_skills_mirror.py all`)")
+                print(f"[dry-run] missing source {src} (would be created by `update_skills_mirror.py build-mirror`)")
                 continue
             print(
-                f"ERROR: missing source `{src}`. Run `python bootstrap/scripts/update_skills_mirror.py all`.",
+                f"ERROR: missing source `{src}`. Run `python bootstrap/scripts/update_skills_mirror.py build-mirror`.",
                 file=sys.stderr,
             )
             return 2
@@ -340,7 +403,7 @@ def main(argv: list[str]) -> int:
 
         installed += 1
 
-    print(f"Done. Removed {removed} existing installs. Installed {installed} skills to `{install_root}`.")
+    log(f"Done. Removed {removed} existing installs. Installed {installed} skills to `{install_root}`.")
     return 0
 
 
