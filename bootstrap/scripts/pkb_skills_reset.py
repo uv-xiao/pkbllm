@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -14,7 +15,68 @@ def _repo_root() -> Path:
     # bootstrap/scripts/<this_file>
     return Path(__file__).resolve().parents[2]
 
-def _load_pkb_skill_slugs(repo_root: Path) -> list[str]:
+_SLUG_BAD = re.compile(r"[^a-z0-9._-]+")
+
+
+def _skill_slug(name: str) -> str:
+    slug = name.strip().lower()
+    slug = re.sub(r"\s+", "-", slug)
+    slug = slug.replace("/", "").replace("\\", "").replace(":", "")
+    slug = _SLUG_BAD.sub("-", slug)
+    slug = slug.strip("-")
+    if not slug:
+        raise ValueError(f"Could not slugify skill name: {name!r}")
+    return slug
+
+
+def _parse_frontmatter_name(skill_md: Path) -> str | None:
+    try:
+        lines = skill_md.read_text(encoding="utf-8", errors="replace").splitlines()
+    except OSError:
+        return None
+    if not lines or lines[0].strip() != "---":
+        return None
+    for line in lines[1:120]:
+        if line.strip() == "---":
+            break
+        if line.startswith("name:"):
+            return line.split(":", 1)[1].strip().strip("'\"")
+    return None
+
+
+def _iter_canonical_skill_dirs(repo_root: Path) -> list[Path]:
+    canonical_roots = [
+        repo_root / "common",
+        repo_root / "knowledge",
+        repo_root / "productivity",
+        repo_root / "human",
+        repo_root / "bootstrap",
+    ]
+    dirs: set[Path] = set()
+    for root in canonical_roots:
+        if not root.is_dir():
+            continue
+        for skill_md in root.rglob("SKILL.md"):
+            if skill_md.name != "SKILL.md":
+                continue
+            parent = skill_md.parent
+            if parent.name.startswith("."):
+                continue
+            dirs.add(parent)
+    return sorted(dirs)
+
+
+def _scan_canonical_pkb_skill_names(repo_root: Path) -> list[str]:
+    names: set[str] = set()
+    for skill_dir in _iter_canonical_skill_dirs(repo_root):
+        name = _parse_frontmatter_name(skill_dir / "SKILL.md")
+        if not name or not name.startswith("uv-"):
+            continue
+        names.add(name)
+    return sorted(names)
+
+
+def _load_pkb_skill_slugs_from_manifest(repo_root: Path) -> list[str]:
     manifest_path = repo_root / "skills" / "manifest.json"
     if not manifest_path.exists():
         raise FileNotFoundError(
@@ -26,52 +88,21 @@ def _load_pkb_skill_slugs(repo_root: Path) -> list[str]:
         raise ValueError(f"Unexpected manifest format in `{manifest_path}` (expected JSON list).")
 
     slugs: list[str] = []
-    names: list[str] = []
     for item in data:
         if not isinstance(item, dict):
             continue
         name = item.get("name")
         slug = item.get("slug")
-        if not isinstance(name, str):
-            continue
-        if not name.startswith("uv-"):
+        if not isinstance(name, str) or not name.startswith("uv-"):
             continue
         if not isinstance(slug, str) or not slug:
-            slug = name
+            slug = _skill_slug(name)
         slugs.append(slug)
-        names.append(name)
 
-    # Prefer slugs (directory names under `skills/`).
     slugs = sorted(set(slugs))
     if not slugs:
         raise ValueError(f"No `uv-` skills found in `{manifest_path}`.")
     return slugs
-
-
-def _load_pkb_skill_names(repo_root: Path) -> list[str]:
-    manifest_path = repo_root / "skills" / "manifest.json"
-    if not manifest_path.exists():
-        raise FileNotFoundError(
-            f"Missing `{manifest_path}`. Run `python bootstrap/scripts/update_skills_mirror.py build-mirror` first."
-        )
-
-    data = json.loads(manifest_path.read_text(encoding="utf-8"))
-    if not isinstance(data, list):
-        raise ValueError(f"Unexpected manifest format in `{manifest_path}` (expected JSON list).")
-
-    names: list[str] = []
-    for item in data:
-        if not isinstance(item, dict):
-            continue
-        name = item.get("name")
-        if not isinstance(name, str) or not name.startswith("uv-"):
-            continue
-        names.append(name)
-
-    names = sorted(set(names))
-    if not names:
-        raise ValueError(f"No `uv-` skills found in `{manifest_path}`.")
-    return names
 
 
 def _agent_dot_dirs_from_gitignore(repo_root: Path) -> list[str]:
@@ -320,26 +351,12 @@ def main(argv: list[str]) -> int:
     def log(msg: str) -> None:
         if args.quiet:
             return
-        print(msg)
+        print(msg, flush=True)
 
-    if not args.skip_mirror_update and not args.clean_only:
-        log(f"[pkb-reset] building skills mirror via `update_skills_mirror.py build-mirror` (python={sys.executable})")
-        _run_update_skills_mirror(repo_root, dry_run=args.dry_run)
-
-    slugs = _load_pkb_skill_slugs(repo_root)
-    skill_names = _load_pkb_skill_names(repo_root)
+    skill_names = _scan_canonical_pkb_skill_names(repo_root)
+    slugs_for_cleanup = sorted({_skill_slug(n) for n in skill_names})
     cleanup_roots = _default_cleanup_roots(repo_root)
     install_root = Path(args.install_root).expanduser().resolve()
-
-    if not args.clean_only:
-        mirror_dirs = _skills_mirror_dir_count(repo_root)
-        log(f"[pkb-reset] skills mirror dirs: {mirror_dirs} (expected {len(slugs)})")
-        missing = _missing_skill_sources(repo_root, slugs)
-        if missing and not args.dry_run:
-            print("[pkb-reset] ERROR: skills mirror is incomplete after build-mirror.", file=sys.stderr)
-            print(f"[pkb-reset] missing sources (first 10): {', '.join(missing[:10])}", file=sys.stderr)
-            print("[pkb-reset] hint: your repo may be incomplete (sparse/partial checkout).", file=sys.stderr)
-            return 2
 
     removed = 0
     if not args.skip_clean:
@@ -356,7 +373,7 @@ def main(argv: list[str]) -> int:
             )
 
         for root in cleanup_roots:
-            for slug in slugs:
+            for slug in slugs_for_cleanup:
                 removed += int(_rm_path(root / slug, dry_run=args.dry_run))
             for name in skill_names:
                 removed += int(_rm_path(root / name, dry_run=args.dry_run))
@@ -364,6 +381,20 @@ def main(argv: list[str]) -> int:
     if args.clean_only:
         log(f"Done. Removed {removed} existing installs.")
         return 0
+
+    if not args.skip_mirror_update:
+        log(f"[pkb-reset] building skills mirror via `update_skills_mirror.py build-mirror` (python={sys.executable})")
+        _run_update_skills_mirror(repo_root, dry_run=args.dry_run)
+
+    slugs = _load_pkb_skill_slugs_from_manifest(repo_root)
+    mirror_dirs = _skills_mirror_dir_count(repo_root)
+    log(f"[pkb-reset] skills mirror dirs: {mirror_dirs} (expected {len(slugs)})")
+    missing = _missing_skill_sources(repo_root, slugs)
+    if missing and not args.dry_run:
+        print("[pkb-reset] ERROR: skills mirror is incomplete after build-mirror.", file=sys.stderr)
+        print(f"[pkb-reset] missing sources (first 10): {', '.join(missing[:10])}", file=sys.stderr)
+        print("[pkb-reset] hint: your repo may be incomplete (sparse/partial checkout), or mirror was deleted mid-run.", file=sys.stderr)
+        return 2
 
     _ensure_dir(install_root, dry_run=args.dry_run)
 
