@@ -44,7 +44,7 @@ If you have pkb skills installed in other locations (e.g. `~/.codex/skills`, `~/
 python bootstrap/scripts/pkb_skills_reset.py
 ```
 
-By default this uses `npx skills remove` (global + project scope, all agents) for exhaustive cleanup, then does a filesystem sweep for common leftover install folders.
+By default this uses `npx skills remove` (global + project scope) plus a filesystem sweep over `~/.*/skills` and common local install folders to catch leftovers across different agents/tools.
 
 Useful flags:
 

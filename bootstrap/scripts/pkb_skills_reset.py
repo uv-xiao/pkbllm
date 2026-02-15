@@ -128,7 +128,10 @@ def _skills_cli_remove(*, repo_root: Path, slugs: list[str], global_scope: bool,
         print("NOTE: `npx` not found; skipping Skills CLI cleanup.")
         return
 
-    base_cmd = ["npx", "-y", "skills", "remove", "-a", "*", "-y"]
+    # NOTE: The Skills CLI help claims `--agent '*'` is supported, but some versions reject it
+    # (e.g., "Invalid agents: *"). We intentionally omit `--agent` and rely on the CLI's default
+    # behavior plus a filesystem sweep for agent-specific `~/.*/skills` link dirs.
+    base_cmd = ["npx", "-y", "skills", "remove", "-y"]
     if global_scope:
         base_cmd.insert(4, "-g")
 
