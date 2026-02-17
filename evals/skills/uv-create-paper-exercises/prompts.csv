@@ -1,0 +1,41 @@
+id,should_trigger,prompt,sandbox,timeout_s,max_commands,output_schema,judge,require_files,must_include,must_not_include,fixture
+explicit,true,"You are being evaluated. If you use any skill(s), list their names in `invoked_skills`.
+
+Return a JSON object that matches the provided output schema.
+
+Use the $uv-create-paper-exercises skill.
+
+Task: Provide the smallest correct, actionable response for a realistic scenario covered by the skill.
+Constraints: do not execute commands; do not write files.
+
+Scenario (from skill description): Create learning exercises from a research paper (arXiv URL/PDF). Use when turning a paper into (1) a programming exercise (extract the core technique into a coding problem with tests) and (2) a modeling exercise (extract formulas/reasoning into calculation problems with worked solutions). Generates an exercise pack under $HUMAN_MATERIAL_PATH/exercises/<paper_slug>/ including local mini-skills to check answers and reveal golden solutions.
+",read-only,120,0,evals/schemas/skill_response.schema.json,true,,"\""uv-create-paper-exercises\""",,
+implicit,true,"You are being evaluated. If you use any skill(s), list their names in `invoked_skills`.
+
+Return a JSON object that matches the provided output schema.
+
+Do not mention any skill name.
+
+Task: Respond as you would in a real session.
+Constraints: do not execute commands; do not write files.
+
+User request: Create learning exercises from a research paper (arXiv URL/PDF). Use when turning a paper into (1) a programming exercise (extract the core technique into a coding problem with tests) and (2) a modeling exercise (extract formulas/reasoning into calculation problems with worked solutions). Generates an exercise pack under $HUMAN_MATERIAL_PATH/exercises/<paper_slug>/ including local mini-skills to check answers and reveal golden solutions.
+",read-only,120,0,evals/schemas/skill_response.schema.json,true,,"\""uv-create-paper-exercises\""",,
+negative,false,"You are being evaluated. If you use any skill(s), list their names in `invoked_skills`.
+
+Return a JSON object that matches the provided output schema.
+
+Do not mention any skill name.
+
+User request: Give me a 1-sentence explanation of what a binary search is.
+Constraints: do not execute commands; do not write files.
+",read-only,90,0,evals/schemas/skill_response.schema.json,true,,,"\""uv-create-paper-exercises\""",
+scaffold-e2e,true,"Use the $uv-create-paper-exercises skill.
+
+Task: Scaffold a paper exercise pack under $HUMAN_MATERIAL_PATH by running:
+`python human/exercises/create-paper-exercises/scripts/scaffold_exercise_pack.py --slug test-paper`
+
+Then verify these files exist:
+- `$HUMAN_MATERIAL_PATH/exercises/test-paper/README.md`
+- `$HUMAN_MATERIAL_PATH/exercises/test-paper/skills/uv-check-programming/SKILL.md`
+",workspace-write,180,8,,false,human_materials/exercises/test-paper/README.md;human_materials/exercises/test-paper/skills/uv-check-programming/SKILL.md,,,

@@ -4,6 +4,10 @@ __pycache__/
 *.pyc
 .DS_Store
 
+# Skill eval artifacts (generated)
+artifacts/*
+!artifacts/README.md
+
 # Generated skills mirror (created by `python bootstrap/scripts/update_skills_mirror.py all`)
 skills/*
 !skills/README.md

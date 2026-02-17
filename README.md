@@ -102,6 +102,16 @@ After adding/editing canonical skills, regenerate the mirror and refresh README 
 python bootstrap/scripts/update_skills_mirror.py all
 ```
 
+## Skill evaluation (contributors)
+
+This repo includes a systematic skill evaluation harness:
+
+- Documentation: `evals/skill_evaluation.md`
+- Static linting (CI-safe, no LLM calls): `python bootstrap/scripts/lint_skills.py --check-evals`
+- LLM-backed evals (requires configured `codex`): `python bootstrap/scripts/run_skill_evals.py --suite explicit --max-cases 1 --write-progress`
+
+Eval outputs are written under `artifacts/skill-evals/` (gitignored).
+
 ## License
 
 - Repository license: `LICENSE`

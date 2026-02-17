@@ -1,0 +1,41 @@
+id,should_trigger,prompt,sandbox,timeout_s,max_commands,output_schema,judge,require_files,must_include,must_not_include,fixture
+explicit,true,"You are being evaluated. If you use any skill(s), list their names in `invoked_skills`.
+
+Return a JSON object that matches the provided output schema.
+
+Use the $uv-init-human-material-repo skill.
+
+Task: Provide the smallest correct, actionable response for a realistic scenario covered by the skill.
+Constraints: do not execute commands; do not write files.
+
+Scenario (from skill description): Initialize a dedicated HUMAN_MATERIAL_PATH git repository for generated human-facing materials. Use when a user asks to set up a new materials repo/folder for slides/manuscripts/exercises, create the expected file structure under $HUMAN_MATERIAL_PATH, and create a local-only .OPENROUTER_API_KEY file for slider rendering.
+",read-only,120,0,evals/schemas/skill_response.schema.json,true,,"\""uv-init-human-material-repo\""",,
+implicit,true,"You are being evaluated. If you use any skill(s), list their names in `invoked_skills`.
+
+Return a JSON object that matches the provided output schema.
+
+Do not mention any skill name.
+
+Task: Respond as you would in a real session.
+Constraints: do not execute commands; do not write files.
+
+User request: Initialize a dedicated HUMAN_MATERIAL_PATH git repository for generated human-facing materials. Use when a user asks to set up a new materials repo/folder for slides/manuscripts/exercises, create the expected file structure under $HUMAN_MATERIAL_PATH, and create a local-only .OPENROUTER_API_KEY file for slider rendering.
+",read-only,120,0,evals/schemas/skill_response.schema.json,true,,"\""uv-init-human-material-repo\""",,
+negative,false,"You are being evaluated. If you use any skill(s), list their names in `invoked_skills`.
+
+Return a JSON object that matches the provided output schema.
+
+Do not mention any skill name.
+
+User request: Give me a 1-sentence explanation of what a binary search is.
+Constraints: do not execute commands; do not write files.
+",read-only,90,0,evals/schemas/skill_response.schema.json,true,,,"\""uv-init-human-material-repo\""",
+init-e2e,true,"Use the $uv-init-human-material-repo skill.
+
+Task: Initialize the human materials repo at $HUMAN_MATERIAL_PATH by running:
+`python human/init-human-material-repo/scripts/init_human_material_repo.py`
+
+Then verify these files exist under $HUMAN_MATERIAL_PATH:
+- `.agents/config.toml`
+- `slides/README.md`
+",workspace-write,180,8,,false,human_materials/.agents/config.toml;human_materials/slides/README.md,,,

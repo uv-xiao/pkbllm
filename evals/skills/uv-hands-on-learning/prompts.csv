@@ -1,0 +1,44 @@
+id,should_trigger,prompt,sandbox,timeout_s,max_commands,output_schema,judge,require_files,must_include,must_not_include,fixture
+explicit,true,"You are being evaluated. If you use any skill(s), list their names in `invoked_skills`.
+
+Return a JSON object that matches the provided output schema.
+
+Use the $uv-hands-on-learning skill.
+
+Task: Provide the smallest correct, actionable response for a realistic scenario covered by the skill.
+Constraints: do not execute commands; do not write files.
+
+Scenario (from skill description): Run a structured hands-on exploration session for an ML/LLM repository (setup, environment detection, experiment plan, execution, profiling, and reporting). Use when you want to validate performance claims, identify bottlenecks, reproduce benchmarks, or turn repo analysis into concrete experiments stored alongside the repo analysis report.
+",read-only,120,0,evals/schemas/skill_response.schema.json,true,,"\""uv-hands-on-learning\""",,
+implicit,true,"You are being evaluated. If you use any skill(s), list their names in `invoked_skills`.
+
+Return a JSON object that matches the provided output schema.
+
+Do not mention any skill name.
+
+Task: Respond as you would in a real session.
+Constraints: do not execute commands; do not write files.
+
+User request: Run a structured hands-on exploration session for an ML/LLM repository (setup, environment detection, experiment plan, execution, profiling, and reporting). Use when you want to validate performance claims, identify bottlenecks, reproduce benchmarks, or turn repo analysis into concrete experiments stored alongside the repo analysis report.
+",read-only,120,0,evals/schemas/skill_response.schema.json,true,,"\""uv-hands-on-learning\""",,
+negative,false,"You are being evaluated. If you use any skill(s), list their names in `invoked_skills`.
+
+Return a JSON object that matches the provided output schema.
+
+Do not mention any skill name.
+
+User request: Give me a 1-sentence explanation of what a binary search is.
+Constraints: do not execute commands; do not write files.
+",read-only,90,0,evals/schemas/skill_response.schema.json,true,,,"\""uv-hands-on-learning\""",
+init-session-e2e,true,"Use the $uv-hands-on-learning skill.
+
+Task:
+1) Create a tiny local git repo in the current directory:
+   - `mkdir -p dummy_repo && git init dummy_repo`
+2) Initialize a hands-on session under $HUMAN_MATERIAL_PATH for that repo:
+   - `python human/hands-on-learning/scripts/init_hands_on_session.py ./dummy_repo --slug dummy --session test`
+
+Then verify these files exist:
+- `$HUMAN_MATERIAL_PATH/research/dummy/hands_on/test/reports/INDEX.md`
+- `$HUMAN_MATERIAL_PATH/research/dummy/hands_on/test/reports/environment.md`
+",workspace-write,300,16,,false,human_materials/research/dummy/hands_on/test/reports/INDEX.md;human_materials/research/dummy/hands_on/test/reports/environment.md,,,

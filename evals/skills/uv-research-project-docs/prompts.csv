@@ -1,0 +1,41 @@
+id,should_trigger,prompt,sandbox,timeout_s,max_commands,output_schema,judge,require_files,must_include,must_not_include,fixture
+explicit,true,"You are being evaluated. If you use any skill(s), list their names in `invoked_skills`.
+
+Return a JSON object that matches the provided output schema.
+
+Use the $uv-research-project-docs skill.
+
+Task: Provide the smallest correct, actionable response for a realistic scenario covered by the skill.
+Constraints: do not execute commands; do not write files.
+
+Scenario (from skill description): Create and maintain the research-project documentation structure (analysis/features/implementation/progress/workloads/spec/evaluation + feats/ impls/ evals/). Use when starting a new research repo, evolving a framework during design/development/evaluation, or when adding/changing features so docs/spec/eval stay synchronized with implementation.
+",read-only,120,0,evals/schemas/skill_response.schema.json,true,,"\""uv-research-project-docs\""",,
+implicit,true,"You are being evaluated. If you use any skill(s), list their names in `invoked_skills`.
+
+Return a JSON object that matches the provided output schema.
+
+Do not mention any skill name.
+
+Task: Respond as you would in a real session.
+Constraints: do not execute commands; do not write files.
+
+User request: Create and maintain the research-project documentation structure (analysis/features/implementation/progress/workloads/spec/evaluation + feats/ impls/ evals/). Use when starting a new research repo, evolving a framework during design/development/evaluation, or when adding/changing features so docs/spec/eval stay synchronized with implementation.
+",read-only,120,0,evals/schemas/skill_response.schema.json,true,,"\""uv-research-project-docs\""",,
+negative,false,"You are being evaluated. If you use any skill(s), list their names in `invoked_skills`.
+
+Return a JSON object that matches the provided output schema.
+
+Do not mention any skill name.
+
+User request: Give me a 1-sentence explanation of what a binary search is.
+Constraints: do not execute commands; do not write files.
+",read-only,90,0,evals/schemas/skill_response.schema.json,true,,,"\""uv-research-project-docs\""",
+docs-e2e,true,"Use the $uv-research-project-docs skill.
+
+Task: Scaffold the research-project docs template into a new local repo directory by running:
+`python productivity/research-project-docs/scripts/init_research_project_docs.py --project-root ./project --docs-root docs`
+
+Then verify these files exist:
+- `project/docs/spec.md`
+- `project/docs/evals/_template.md`
+",workspace-write,180,8,,false,project/docs/spec.md;project/docs/evals/_template.md,,,

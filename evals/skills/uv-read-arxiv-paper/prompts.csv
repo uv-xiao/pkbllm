@@ -1,0 +1,32 @@
+id,should_trigger,prompt,sandbox,timeout_s,max_commands,output_schema,judge,require_files,must_include,must_not_include,fixture
+explicit,true,"You are being evaluated. If you use any skill(s), list their names in `invoked_skills`.
+
+Return a JSON object that matches the provided output schema.
+
+Use the $uv-read-arxiv-paper skill.
+
+Task: Provide the smallest correct, actionable response for a realistic scenario covered by the skill.
+Constraints: do not execute commands; do not write files.
+
+Scenario (from skill description): Download and deeply read an arXiv paper (given an arXiv URL or id), then write a clear human-facing report with strong storytelling and logical reasoning. Use when asked to summarize/review an arXiv paper, extract key ideas, connect them to practice, and produce a report under $HUMAN_MATERIAL_PATH/research/<paper_slug>/report.md. Stores downloads under $HUMAN_MATERIAL_PATH/.references/ (configurable via $HUMAN_MATERIAL_PATH/.agents/config.toml or ~/.agents/config.toml).
+",read-only,120,0,evals/schemas/skill_response.schema.json,true,,"\""uv-read-arxiv-paper\""",,
+implicit,true,"You are being evaluated. If you use any skill(s), list their names in `invoked_skills`.
+
+Return a JSON object that matches the provided output schema.
+
+Do not mention any skill name.
+
+Task: Respond as you would in a real session.
+Constraints: do not execute commands; do not write files.
+
+User request: Download and deeply read an arXiv paper (given an arXiv URL or id), then write a clear human-facing report with strong storytelling and logical reasoning. Use when asked to summarize/review an arXiv paper, extract key ideas, connect them to practice, and produce a report under $HUMAN_MATERIAL_PATH/research/<paper_slug>/report.md. Stores downloads under $HUMAN_MATERIAL_PATH/.references/ (configurable via $HUMAN_MATERIAL_PATH/.agents/config.toml or ~/.agents/config.toml).
+",read-only,120,0,evals/schemas/skill_response.schema.json,true,,"\""uv-read-arxiv-paper\""",,
+negative,false,"You are being evaluated. If you use any skill(s), list their names in `invoked_skills`.
+
+Return a JSON object that matches the provided output schema.
+
+Do not mention any skill name.
+
+User request: Give me a 1-sentence explanation of what a binary search is.
+Constraints: do not execute commands; do not write files.
+",read-only,90,0,evals/schemas/skill_response.schema.json,true,,,"\""uv-read-arxiv-paper\""",

@@ -1,0 +1,39 @@
+id,should_trigger,prompt,sandbox,timeout_s,max_commands,output_schema,judge,require_files,must_include,must_not_include,fixture
+explicit,true,"You are being evaluated. If you use any skill(s), list their names in `invoked_skills`.
+
+Return a JSON object that matches the provided output schema.
+
+Use the $uv-bootstrap-skill-maintenance skill.
+
+Task: Provide the smallest correct, actionable response for a realistic scenario covered by the skill.
+Constraints: do not execute commands; do not write files.
+
+Scenario (from skill description): Maintain and curate the pkbllm skills repository. Use when adding/importing a new skill, merging skills from external repos, updating or refactoring existing skills, regenerating the generated `skills/` mirror, or ensuring licensing/compliance and naming conventions (all skills must start with `uv-`).
+",read-only,120,0,evals/schemas/skill_response.schema.json,true,,"\""uv-bootstrap-skill-maintenance\""",,
+implicit,true,"You are being evaluated. If you use any skill(s), list their names in `invoked_skills`.
+
+Return a JSON object that matches the provided output schema.
+
+Do not mention any skill name.
+
+Task: Respond as you would in a real session.
+Constraints: do not execute commands; do not write files.
+
+User request: Maintain and curate the pkbllm skills repository. Use when adding/importing a new skill, merging skills from external repos, updating or refactoring existing skills, regenerating the generated `skills/` mirror, or ensuring licensing/compliance and naming conventions (all skills must start with `uv-`).
+",read-only,120,0,evals/schemas/skill_response.schema.json,true,,"\""uv-bootstrap-skill-maintenance\""",,
+negative,false,"You are being evaluated. If you use any skill(s), list their names in `invoked_skills`.
+
+Return a JSON object that matches the provided output schema.
+
+Do not mention any skill name.
+
+User request: Give me a 1-sentence explanation of what a binary search is.
+Constraints: do not execute commands; do not write files.
+",read-only,90,0,evals/schemas/skill_response.schema.json,true,,,"\""uv-bootstrap-skill-maintenance\""",
+mirror-e2e,true,"Use the $uv-bootstrap-skill-maintenance skill.
+
+Task: Regenerate the skills mirror in this repo by running:
+`python bootstrap/scripts/update_skills_mirror.py all`
+
+Then verify `skills/manifest.json` exists.
+",workspace-write,180,12,,false,skills/manifest.json,,,fixtures/mirror-e2e

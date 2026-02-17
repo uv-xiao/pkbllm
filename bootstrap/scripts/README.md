@@ -6,8 +6,12 @@ Small utilities for maintaining this repo.
 <!-- PKBLLM_TABLE_START -->
 | Path | Type | Description |
 | --- | --- | --- |
+| `gen_skill_eval_cases.py` | file | Script |
+| `lint_skills.py` | file | Script |
 | `pkb_skills_install.sh` | file | Script |
 | `pkb_skills_reset.py` | file | Script |
+| `run_skill_evals.py` | file | Script |
+| `skill_eval_lib.py` | file | Script |
 | `update_skills_mirror.config.json` | file | Data file |
 | `update_skills_mirror.py` | file | Script |
 <!-- PKBLLM_TABLE_END -->
