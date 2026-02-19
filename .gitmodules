@@ -1,3 +1,0 @@
-[submodule "examples/llm-artifacts"]
-	path = examples/llm-artifacts
-	url = git@github.com:uv-xiao/pkb-llm-artifacts.git
