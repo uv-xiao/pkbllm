@@ -120,7 +120,7 @@ This repo ships a small CLI that recommends relevant `uv-*` skills for a task an
 
 ```bash
 python /path/to/pkbllm/bootstrap/scripts/pkb_agents_md.py recommend --query "<task>"
-python /path/to/pkbllm/bootstrap/scripts/pkb_agents_md.py assemble --query "<task>" --agents-md ./AGENTS.md --pick
+python /path/to/pkbllm/bootstrap/scripts/pkb_agents_md.py assemble --query "<task>" --agents-md ./AGENTS.md --pick --init
 ```
 
 ## License
