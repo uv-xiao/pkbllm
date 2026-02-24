@@ -1,0 +1,42 @@
+id,should_trigger,prompt,sandbox,timeout_s,max_commands,output_schema,judge,require_files,must_include,must_not_include,fixture
+explicit,true,"You are being evaluated. If you use any skill(s), list their names in `invoked_skills`.
+
+Return a JSON object that matches the provided output schema.
+
+Use the $uv-start-task skill.
+
+Task: Provide the smallest correct, actionable response for starting a real task using AGENTS.md assembly.
+Constraints: do not execute commands; do not write files.
+
+Hard requirement: include both commands (recommend + assemble) referencing `pkb_agents_md.py`.
+",read-only,120,0,evals/schemas/skill_response.schema.json,true,,pkb_agents_md\.py|recommend|assemble,,
+implicit,true,"You are being evaluated. If you use any skill(s), list their names in `invoked_skills`.
+
+Return a JSON object that matches the provided output schema.
+
+Do not mention any skill name.
+
+Task: You just opened a new repo and need the agent to follow the right workflows. Tell me how to assemble the relevant pkbllm notes into this repo’s AGENTS.md so any agent will follow them automatically.
+Constraints: do not execute commands; do not write files.
+
+Hard requirement: include both commands (recommend + assemble) referencing `pkb_agents_md.py`.
+",read-only,120,0,evals/schemas/skill_response.schema.json,true,,pkb_agents_md\.py|recommend|assemble,,
+negative,false,"You are being evaluated. If you use any skill(s), list their names in `invoked_skills`.
+
+Return a JSON object that matches the provided output schema.
+
+Do not mention any skill name.
+
+User request: Give me a 1-sentence explanation of what a binary search is.
+Constraints: do not execute commands; do not write files.
+",read-only,90,0,evals/schemas/skill_response.schema.json,true,,,,
+assemble-e2e,true,"Use the $uv-start-task skill.
+
+Task:
+1) Create a new file `AGENTS.md` in the current directory containing a single line `# Project agents`.
+2) Run the pkb agents-md CLI to assemble notes into that AGENTS.md:
+   `python bootstrap/scripts/pkb_agents_md.py assemble --query 'start task' --agents-md ./AGENTS.md --skill uv-start-task --dry-run`
+3) Then run the same command without `--dry-run` and finally print the lines in `AGENTS.md` containing the markers.
+
+Then verify `AGENTS.md` exists and includes both markers.
+",workspace-write,240,12,,false,AGENTS.md,PKBLLM-AGENTS-NOTE-START|PKBLLM-AGENTS-NOTE-END,,

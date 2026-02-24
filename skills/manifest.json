@@ -228,6 +228,12 @@
     "slug": "uv-speculative-decoding"
   },
   {
+    "canonical_path": "common/start-task",
+    "description": "Use at the start of a task to assemble relevant pkbllm skill notes into the project\u2019s AGENTS.md (passive, in-band context). Guides the user to run the pkb agents-md CLI (recommend + assemble), pick skills, and set up minimal repo context so any agent can immediately work with the right constraints.",
+    "name": "uv-start-task",
+    "slug": "uv-start-task"
+  },
+  {
     "canonical_path": "human/slider/styled-artifacts",
     "description": "Generate slide images and final PDF/PPTX from v2 styled prompts ($HUMAN_MATERIAL_PATH/slides/<deck>/prompts/styled/<deck>.md), storing intermediates in $HUMAN_MATERIAL_PATH/slides/<deck>/artifacts/<deck>/work/. Use when the user asks to render/generate/export slides from a Styled PROMPT into images/PDF/PPTX.",
     "name": "uv-styled-artifacts",

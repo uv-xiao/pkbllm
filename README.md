@@ -112,6 +112,17 @@ This repo includes a systematic skill evaluation harness:
 
 Eval outputs are written under `artifacts/skill-evals/` (gitignored).
 
+## AGENTS.md assembly (recommended for real tasks)
+
+For real projects, “skills” are often more useful as **passive notes** embedded into a repo’s `AGENTS.md` so any agent run starts with the right context.
+
+This repo ships a small CLI that recommends relevant `uv-*` skills for a task and injects the selected `SKILL.md` bodies into a marked section in your project’s `AGENTS.md`:
+
+```bash
+python /path/to/pkbllm/bootstrap/scripts/pkb_agents_md.py recommend --query "<task>"
+python /path/to/pkbllm/bootstrap/scripts/pkb_agents_md.py assemble --query "<task>" --agents-md ./AGENTS.md --pick
+```
+
 ## License
 
 - Repository license: `LICENSE`

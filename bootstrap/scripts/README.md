@@ -8,6 +8,7 @@ Small utilities for maintaining this repo.
 | --- | --- | --- |
 | `gen_skill_eval_cases.py` | file | Script |
 | `lint_skills.py` | file | Script |
+| `pkb_agents_md.py` | file | Script |
 | `pkb_skills_install.sh` | file | Script |
 | `pkb_skills_reset.py` | file | Script |
 | `run_skill_evals.py` | file | Script |
