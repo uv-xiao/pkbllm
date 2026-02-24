@@ -123,6 +123,10 @@ python /path/to/pkbllm/bootstrap/scripts/pkb_agents_md.py recommend --query "<ta
 python /path/to/pkbllm/bootstrap/scripts/pkb_agents_md.py assemble --query "<task>" --agents-md ./AGENTS.md --pick --init
 ```
 
+This workflow is inspired by Vercel’s findings that passive, in-band `AGENTS.md` context can outperform opt-in “skills” in agent evals (and the Next.js `agents-md` tooling that injects an index into `AGENTS.md`). See:
+- https://vercel.com/blog/agents-md-outperforms-skills-in-our-agent-evals
+- https://github.com/vercel/next.js/pull/88961
+
 ## License
 
 - Repository license: `LICENSE`
