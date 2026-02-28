@@ -36,6 +36,34 @@ List available skills:
 npx skills add . --list
 ```
 
+## Start a task (interactive AGENTS.md assembly + install)
+
+If you want a fast “task bootstrap” flow that:
+
+- clones pkbllm to a **temporary** directory,
+- asks a couple of lightweight task questions,
+- recommends skills, lets you pick,
+- installs the picked skills into your target repo,
+- and assembles full `SKILL.md` bodies into your target repo’s `AGENTS.md`,
+
+run:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/uv-xiao/pkbllm/main/bootstrap/scripts/pkb_task_start.sh | bash
+```
+
+Or with `wget`:
+
+```bash
+wget -qO- https://raw.githubusercontent.com/uv-xiao/pkbllm/main/bootstrap/scripts/pkb_task_start.sh | bash
+```
+
+Options (examples):
+
+- Target repo: `... | bash -s -- --target /path/to/repo`
+- Keep the temp clone: `... | bash -s -- --keep`
+- Use Skills CLI install instead of copy: `... | bash -s -- --install-mode skills-cli --agent codex`
+
 ## Recommended: repo-local install (and cleanup)
 
 If you have pkb skills installed in other locations (e.g. `~/.codex/skills`, `~/.agents/skills`, `<repo>/.codex/skills`, etc.), reset them and install repo-locally under `<repo>/.agent/skills`:

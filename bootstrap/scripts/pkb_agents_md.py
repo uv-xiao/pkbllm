@@ -21,6 +21,7 @@ CANONICAL_ROOTS = [
     REPO_ROOT / "knowledge",
     REPO_ROOT / "productivity",
 ]
+MIRROR_ROOT = REPO_ROOT / "skills"
 
 START_MARKER = "<!-- PKBLLM-AGENTS-NOTE-START -->"
 END_MARKER = "<!-- PKBLLM-AGENTS-NOTE-END -->"
@@ -111,6 +112,42 @@ def iter_canonical_skills(repo_root: Path) -> Iterable[SkillDoc]:
                 tokens=tokens,
                 outbound_refs=refs,
             )
+
+
+def iter_mirror_skills(repo_root: Path) -> Iterable[SkillDoc]:
+    """
+    Enumerate skills from the generated mirror under `skills/`.
+
+    This is useful for workflows that intentionally treat `skills/` as the selection surface.
+    """
+    root = repo_root / "skills"
+    if not root.is_dir():
+        return
+    for skill_md in sorted(root.glob("*/SKILL.md")):
+        fm = _read_frontmatter(skill_md)
+        name = (fm.get("name") or "").strip()
+        if not name.startswith("uv-"):
+            continue
+        description = (fm.get("description") or "").strip()
+        body = _read_text(skill_md)
+        tokens = tuple(_tokenize(f"{name}\n{description}\n{body}"))
+        refs = tuple(sorted({m.lower() for m in _SKILL_REF.findall(body) if m.lower() != name.lower()}))
+        yield SkillDoc(
+            name=name,
+            description=description,
+            skill_md=skill_md,
+            body=body,
+            tokens=tokens,
+            outbound_refs=refs,
+        )
+
+
+def iter_skill_docs(repo_root: Path, source: str) -> list[SkillDoc]:
+    if source == "mirror":
+        return list(iter_mirror_skills(repo_root))
+    if source == "canonical":
+        return list(iter_canonical_skills(repo_root))
+    raise ValueError(f"unknown --source: {source!r}")
 
 
 def _git_rev(repo_root: Path) -> str:
@@ -349,6 +386,12 @@ def main(argv: Optional[list[str]] = None) -> int:
     ap = argparse.ArgumentParser(
         description="Assemble pkbllm skills into a project AGENTS.md block (passive in-band context)."
     )
+    ap.add_argument(
+        "--source",
+        choices=["canonical", "mirror"],
+        default="canonical",
+        help="Where to load skills from (default: canonical). Use 'mirror' to select from generated skills/.",
+    )
     sub = ap.add_subparsers(dest="cmd", required=True)
 
     p_list = sub.add_parser("list", help="List available canonical pkbllm skills.")
@@ -375,7 +418,7 @@ def main(argv: Optional[list[str]] = None) -> int:
 
     args = ap.parse_args(argv)
     repo_root = REPO_ROOT
-    docs = list(iter_canonical_skills(repo_root))
+    docs = iter_skill_docs(repo_root, args.source)
 
     if args.cmd == "list":
         for d in sorted(docs, key=lambda x: x.name):

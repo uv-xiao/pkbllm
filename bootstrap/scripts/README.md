@@ -11,6 +11,7 @@ Small utilities for maintaining this repo.
 | `pkb_agents_md.py` | file | Script |
 | `pkb_skills_install.sh` | file | Script |
 | `pkb_skills_reset.py` | file | Script |
+| `pkb_task_start.sh` | file | Script |
 | `run_skill_evals.py` | file | Script |
 | `skill_eval_lib.py` | file | Script |
 | `update_skills_mirror.config.json` | file | Data file |
