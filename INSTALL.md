@@ -64,6 +64,25 @@ Options (examples):
 - Keep the temp clone: `... | bash -s -- --keep`
 - Use Skills CLI install instead of copy: `... | bash -s -- --install-mode skills-cli --agent codex`
 
+## Start a task (agent-assisted; structured outputs)
+
+If you want the recommendation + selection step to be done by an LLM agent with a strict structured output (so the script can parse it and continue), use:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/uv-xiao/pkbllm/main/bootstrap/scripts/pkb_task_start_agent.sh | bash
+```
+
+Or with `wget`:
+
+```bash
+wget -qO- https://raw.githubusercontent.com/uv-xiao/pkbllm/main/bootstrap/scripts/pkb_task_start_agent.sh | bash
+```
+
+Notes:
+
+- Requires the Codex CLI (`codex`) to be configured on the machine.
+- The script clones pkbllm to a temp dir, runs an agent to select skills (JSON Schema constrained), then installs skills + assembles `AGENTS.md` in the target repo.
+
 ## Recommended: repo-local install (and cleanup)
 
 If you have pkb skills installed in other locations (e.g. `~/.codex/skills`, `~/.agents/skills`, `<repo>/.codex/skills`, etc.), reset them and install repo-locally under `<repo>/.agent/skills`:
