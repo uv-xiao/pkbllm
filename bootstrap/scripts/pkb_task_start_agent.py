@@ -36,10 +36,20 @@ def _read_text(path: Path) -> str:
     return path.read_text(encoding="utf-8", errors="replace")
 
 
+def _input_or_die(prompt: str = "") -> str:
+    try:
+        return input(prompt)
+    except EOFError as e:
+        raise SystemExit(
+            "Interactive input is unavailable. If you launched via a piped shell command, rerun with a TTY "
+            "or pass --no-interactive --task '...' --done '...'."
+        ) from e
+
+
 def _prompt(label: str, default: Optional[str] = None) -> str:
     if default is None:
-        return input(f"{label}: ").strip()
-    raw = input(f"{label} [{default}]: ").strip()
+        return _input_or_die(f"{label}: ").strip()
+    raw = _input_or_die(f"{label} [{default}]: ").strip()
     return raw or default
 
 
@@ -47,7 +57,7 @@ def _prompt_multiline(label: str) -> str:
     print(f"{label} (end with empty line):")
     lines: list[str] = []
     while True:
-        line = input()
+        line = _input_or_die()
         if not line.strip():
             break
         lines.append(line.rstrip("\n"))

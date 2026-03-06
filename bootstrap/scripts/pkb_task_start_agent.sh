@@ -33,6 +33,7 @@ NO_INTERACTIVE="0"
 TASK=""
 DONE=""
 CONSTRAINTS=""
+PROMPT_TTY_FD_OPEN="0"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -79,6 +80,23 @@ git clone --depth 1 --filter=blob:none --branch "${PKB_REF}" "${PKB_REPO_URL}" "
   exit 1
 }
 
+if [[ "${NO_INTERACTIVE}" != "1" && ! -t 0 ]]; then
+  if exec 3</dev/tty; then
+    PROMPT_TTY_FD_OPEN="1"
+  else
+    cat >&2 <<'EOF'
+ERROR: stdin is not interactive, so prompt mode cannot run here.
+
+If you launched this with `curl ... | bash`, rerun it in one of these forms:
+  curl -fsSL https://raw.githubusercontent.com/uv-xiao/pkbllm/main/bootstrap/scripts/pkb_task_start_agent.sh | bash -s -- --no-interactive --task "..." --done "..."
+  curl -fsSL https://raw.githubusercontent.com/uv-xiao/pkbllm/main/bootstrap/scripts/pkb_task_start_agent.sh | bash -s -- --target /path/to/repo
+
+The first form is for CI/non-TTY usage. The second form works from a real terminal because bash can still prompt via /dev/tty.
+EOF
+    exit 2
+  fi
+fi
+
 ARGS=(--target "${TARGET_DIR}" --agent "${AGENT}" --install-mode "${INSTALL_MODE}")
 if [[ "${NO_INTERACTIVE}" == "1" ]]; then
   ARGS+=(--no-interactive)
@@ -87,5 +105,9 @@ if [[ -n "${TASK}" ]]; then ARGS+=(--task "${TASK}"); fi
 if [[ -n "${DONE}" ]]; then ARGS+=(--done "${DONE}"); fi
 if [[ -n "${CONSTRAINTS}" ]]; then ARGS+=(--constraints "${CONSTRAINTS}"); fi
 
-python3 "${PKB_DIR}/bootstrap/scripts/pkb_task_start_agent.py" "${ARGS[@]}"
-
+if [[ "${PROMPT_TTY_FD_OPEN}" == "1" ]]; then
+  python3 "${PKB_DIR}/bootstrap/scripts/pkb_task_start_agent.py" "${ARGS[@]}" <&3
+  exec 3<&-
+else
+  python3 "${PKB_DIR}/bootstrap/scripts/pkb_task_start_agent.py" "${ARGS[@]}"
+fi

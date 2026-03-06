@@ -69,19 +69,21 @@ Options (examples):
 If you want the recommendation + selection step to be done by an LLM agent with a strict structured output (so the script can parse it and continue), use:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/uv-xiao/pkbllm/main/bootstrap/scripts/pkb_task_start_agent.sh | bash
+curl -fsSL https://raw.githubusercontent.com/uv-xiao/pkbllm/main/bootstrap/scripts/pkb_task_start_agent.sh | bash -s --
 ```
 
 Or with `wget`:
 
 ```bash
-wget -qO- https://raw.githubusercontent.com/uv-xiao/pkbllm/main/bootstrap/scripts/pkb_task_start_agent.sh | bash
+wget -qO- https://raw.githubusercontent.com/uv-xiao/pkbllm/main/bootstrap/scripts/pkb_task_start_agent.sh | bash -s --
 ```
 
 Notes:
 
 - Requires the Codex CLI (`codex`) to be configured on the machine.
 - The script clones pkbllm to a temp dir, runs an agent to select skills (JSON Schema constrained), then installs skills + assembles `AGENTS.md` in the target repo.
+- In a real terminal, the wrapper now reattaches prompts to `/dev/tty`, so `curl ... | bash -s --` can still ask follow-up questions.
+- In CI or other non-TTY environments, use `--no-interactive --task "..." --done "..."` so the wrapper does not attempt prompts.
 
 ## Recommended: repo-local install (and cleanup)
 
