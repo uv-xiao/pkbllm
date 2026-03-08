@@ -196,6 +196,7 @@ def _run_claude_exec(
     *,
     prompt: str,
     work_dir: Path,
+    output_schema: Path,
     output_last_message: Path,
     timeout_s: int,
     debug_dir: Path,
@@ -210,10 +211,10 @@ def _run_claude_exec(
         "claude",
         "-p",
         prompt,
-        "--cwd",
-        str(work_dir),
         "--output-format",
-        "text",
+        "json",
+        "--json-schema",
+        _read_text(output_schema).strip(),
     ]
     model = (os.environ.get("CLAUDE_CODE_MODEL") or os.environ.get("ANTHROPIC_MODEL") or "").strip()
     if model:
@@ -237,16 +238,23 @@ def _run_claude_exec(
     stdout = (res.stdout or "").strip()
     _write_text(debug_dir / f"{tag}.stdout.txt", res.stdout or "")
     _write_text(debug_dir / f"{tag}.stderr.txt", res.stderr or "")
-    if res.returncode != 0:
-        raise RuntimeError(f"claude -p failed (exit {res.returncode}); see {debug_dir}/{tag}.stderr.txt")
-    _write_text(output_last_message, stdout + ("\n" if stdout else ""))
     try:
         obj = json.loads(stdout)
-        if not isinstance(obj, dict):
-            raise ValueError("Claude output is not a JSON object")
-        return obj
     except Exception as e:
         raise RuntimeError(f"Failed to parse Claude JSON output: {e}")
+    if not isinstance(obj, dict):
+        raise RuntimeError("Claude output is not a JSON object")
+
+    structured = obj.get("structured_output")
+    if isinstance(structured, dict):
+        _write_text(output_last_message, json.dumps(structured, indent=2, sort_keys=True) + "\n")
+        return structured
+
+    if res.returncode == 0:
+        _write_text(output_last_message, json.dumps(obj, indent=2, sort_keys=True) + "\n")
+        return obj
+
+    raise RuntimeError(f"claude -p failed (exit {res.returncode}); see {debug_dir}/{tag}.stderr.txt")
 
 
 def main(argv: Optional[list[str]] = None) -> int:
@@ -372,6 +380,7 @@ In `steps`, include the two CLI commands the user will run later:
         q_obj = _run_claude_exec(
             prompt=q_prompt,
             work_dir=work_dir,
+            output_schema=questions_schema,
             output_last_message=questions_out,
             timeout_s=max(30, int(args.timeout_s)),
             debug_dir=debug_dir,
@@ -435,6 +444,7 @@ Constraints:
         plan = _run_claude_exec(
             prompt=plan_prompt,
             work_dir=work_dir,
+            output_schema=plan_schema,
             output_last_message=plan_out,
             timeout_s=max(30, int(args.timeout_s)),
             debug_dir=debug_dir,
