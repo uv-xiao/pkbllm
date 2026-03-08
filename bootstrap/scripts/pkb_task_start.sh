@@ -151,6 +151,9 @@ git clone --depth 1 --filter=blob:none --branch "${PKB_REF}" "${PKB_REPO_URL}" "
   exit 1
 }
 
+echo "Preparing generated skills mirror..." >&2
+python3 "${PKB_DIR}/bootstrap/scripts/update_skills_mirror.py" all >/dev/null
+
 AGENT_INFO="$(resolve_agent_json "${PKB_DIR}" "${AGENT}")"
 SELECTED_AGENT="$(printf '%s' "${AGENT_INFO}" | json_field selected_agent)"
 DETECTED_AGENTS="$(printf '%s' "${AGENT_INFO}" | json_field detected_agents)"

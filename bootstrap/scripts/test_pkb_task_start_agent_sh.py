@@ -49,7 +49,7 @@ exit 0
             "python3",
             """#!/usr/bin/env bash
 set -euo pipefail
-printf '%s\n' "$@" > "$PYTHON3_ARGS_FILE"
+printf '%s\n---\n' "$@" >> "$PYTHON3_ARGS_FILE"
 exit 0
 """,
         )
@@ -72,7 +72,9 @@ exit 0
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("stdin is not interactive", result.stderr)
         self.assertIn("--no-interactive --task", result.stderr)
-        self.assertFalse(self.python3_args_file.exists(), "python3 should not be invoked")
+        args = self.python3_args_file.read_text(encoding="utf-8")
+        self.assertIn("update_skills_mirror.py", args)
+        self.assertNotIn("pkb_task_start_agent.py", args, "bootstrap entrypoint should not be invoked")
 
     def test_no_interactive_mode_passes_flags_to_python(self) -> None:
         result = subprocess.run(
@@ -95,6 +97,7 @@ exit 0
 
         self.assertEqual(result.returncode, 0, msg=result.stderr)
         args = self.python3_args_file.read_text(encoding="utf-8")
+        self.assertIn("update_skills_mirror.py", args)
         self.assertIn("--no-interactive", args)
         self.assertIn("--task", args)
         self.assertIn("bootstrap skills", args)

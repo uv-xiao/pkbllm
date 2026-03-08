@@ -81,6 +81,9 @@ git clone --depth 1 --filter=blob:none --branch "${PKB_REF}" "${PKB_REPO_URL}" "
   exit 1
 }
 
+echo "Preparing generated skills mirror..." >&2
+python3 "${PKB_DIR}/bootstrap/scripts/update_skills_mirror.py" all >/dev/null
+
 if [[ "${NO_INTERACTIVE}" != "1" && ! -t 0 ]]; then
   if exec 3</dev/tty; then
     PROMPT_TTY_FD_OPEN="1"

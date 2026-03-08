@@ -79,6 +79,8 @@ fi
 dst="${@: -1}"
 mkdir -p "$(dirname "$dst")"
 cp -R "$TEST_REPO_SRC" "$dst"
+rm -rf "$dst/skills"
+mkdir -p "$dst/skills"
 """,
         )
 
