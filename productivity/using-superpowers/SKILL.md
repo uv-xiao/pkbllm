@@ -19,7 +19,7 @@ Skills are directories containing `SKILL.md`. In this repo, the generated distri
 npx -y skills add . --list
 ```
 
-If your environment supports “invoking” a skill by name, invoke it. Otherwise, search for the skill’s `SKILL.md` and follow it.
+If your environment supports invoking a skill by name, invoke it. Otherwise, search for the skill's `SKILL.md` and follow it directly.
 
 # Using Skills
 
@@ -30,6 +30,9 @@ If your environment supports “invoking” a skill by name, invoke it. Otherwis
 ```dot
 digraph skill_flow {
     "User message received" [shape=doublecircle];
+    "About to plan first?" [shape=doublecircle];
+    "Already brainstormed?" [shape=diamond];
+    "Invoke brainstorming skill" [shape=box];
     "Might any skill apply?" [shape=diamond];
     "Invoke Skill tool" [shape=box];
     "Announce: 'Using [skill] to [purpose]'" [shape=box];
@@ -37,6 +40,11 @@ digraph skill_flow {
     "Create TodoWrite todo per item" [shape=box];
     "Follow skill exactly" [shape=box];
     "Respond (including clarifications)" [shape=doublecircle];
+
+    "About to plan first?" -> "Already brainstormed?";
+    "Already brainstormed?" -> "Invoke brainstorming skill" [label="no"];
+    "Already brainstormed?" -> "Might any skill apply?" [label="yes"];
+    "Invoke brainstorming skill" -> "Might any skill apply?";
 
     "User message received" -> "Might any skill apply?";
     "Might any skill apply?" -> "Invoke Skill tool" [label="yes, even 1%"];
@@ -89,6 +97,8 @@ The skill itself tells you which.
 ## User Instructions
 
 Instructions say WHAT, not HOW. "Add X" or "Fix Y" doesn't mean skip workflows.
+
+If a user asks to plan or implement something new, that does **not** override required process skills. Planning still routes through `uv-brainstorming` first.
 
 ## pkbllm-specific notes
 

@@ -11,8 +11,11 @@ import sys
 from pathlib import Path
 from typing import Any, Optional
 
+from pkb_install_lib import copy_install_root, prompt_choices_text, resolve_agent
+
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+SELECTOR_CHOICES = ("auto", "claude", "codex")
 
 
 def _now_id() -> str:
@@ -68,15 +71,17 @@ def _which(cmd: str) -> Optional[str]:
     return shutil.which(cmd)
 
 
-def _agent_dest(target: Path, agent: str) -> Path:
-    a = agent.strip().lower()
-    if a == "codex":
-        return target / ".codex" / "skills"
-    if a in {"agents", "agent"}:
-        # Best-effort for other runtimes that follow the same convention.
-        return target / f".{a}" / "skills"
-    # Unknown: default to codex-like.
-    return target / ".codex" / "skills"
+def _resolve_selector(requested: str) -> str:
+    selector = (requested or "auto").strip().lower()
+    if selector not in SELECTOR_CHOICES:
+        raise SystemExit(f"Unsupported --selector={requested!r}; expected one of {SELECTOR_CHOICES}.")
+    if selector != "auto":
+        return selector
+    if _which("claude") is not None:
+        return "claude"
+    if _which("codex") is not None:
+        return "codex"
+    return "claude"
 
 
 def _copy_skill_dir(src: Path, dst: Path) -> None:
@@ -106,17 +111,18 @@ def _list_mirror_skill_names(pkb_root: Path) -> set[str]:
     return out
 
 
-def _snapshot_skills_for_codex(pkb_root: Path, work_dir: Path) -> None:
-    """
-    Provide pkb skills to codex via `.codex/skills` inside `work_dir`.
-    We intentionally use the generated `skills/` mirror as the surface.
-    """
+def _snapshot_skills_for_runner(pkb_root: Path, work_dir: Path, selector: str) -> None:
     skills_src = pkb_root / "skills"
     if not skills_src.is_dir():
         raise FileNotFoundError(f"Missing skills mirror at {skills_src}. Run update_skills_mirror.py all.")
-    codex_dir = work_dir / ".codex"
-    _ensure_dir(codex_dir)
-    dst = codex_dir / "skills"
+    if selector == "claude":
+        runtime_dir = work_dir / ".claude"
+    elif selector == "codex":
+        runtime_dir = work_dir / ".codex"
+    else:
+        raise ValueError(f"Unsupported selector: {selector}")
+    _ensure_dir(runtime_dir)
+    dst = runtime_dir / "skills"
     if dst.exists() or dst.is_symlink():
         if dst.is_dir() and not dst.is_symlink():
             shutil.rmtree(dst)
@@ -186,10 +192,68 @@ def _run_codex_exec(
         raise RuntimeError(f"Failed to parse structured output JSON: {e}")
 
 
+def _run_claude_exec(
+    *,
+    prompt: str,
+    work_dir: Path,
+    output_last_message: Path,
+    timeout_s: int,
+    debug_dir: Path,
+    tag: str,
+) -> dict[str, Any]:
+    if _which("claude") is None:
+        raise RuntimeError("Missing `claude` CLI on PATH.")
+    _ensure_dir(work_dir)
+    _ensure_dir(debug_dir)
+
+    cmd = [
+        "claude",
+        "-p",
+        prompt,
+        "--cwd",
+        str(work_dir),
+        "--output-format",
+        "text",
+    ]
+    model = (os.environ.get("CLAUDE_CODE_MODEL") or os.environ.get("ANTHROPIC_MODEL") or "").strip()
+    if model:
+        cmd.extend(["--model", model])
+    _write_text(debug_dir / f"{tag}.prompt.txt", prompt)
+    _write_text(debug_dir / f"{tag}.cmd.txt", " ".join(cmd) + "\n")
+    try:
+        res = subprocess.run(
+            cmd,
+            cwd=str(work_dir),
+            text=True,
+            capture_output=True,
+            timeout=timeout_s,
+            env=os.environ,
+        )
+    except subprocess.TimeoutExpired as e:
+        _write_text(debug_dir / f"{tag}.stdout.txt", (e.stdout or ""))
+        _write_text(debug_dir / f"{tag}.stderr.txt", (e.stderr or "") + f"\nTIMEOUT after {timeout_s}s\n")
+        raise
+
+    stdout = (res.stdout or "").strip()
+    _write_text(debug_dir / f"{tag}.stdout.txt", res.stdout or "")
+    _write_text(debug_dir / f"{tag}.stderr.txt", res.stderr or "")
+    if res.returncode != 0:
+        raise RuntimeError(f"claude -p failed (exit {res.returncode}); see {debug_dir}/{tag}.stderr.txt")
+    _write_text(output_last_message, stdout + ("\n" if stdout else ""))
+    try:
+        obj = json.loads(stdout)
+        if not isinstance(obj, dict):
+            raise ValueError("Claude output is not a JSON object")
+        return obj
+    except Exception as e:
+        raise RuntimeError(f"Failed to parse Claude JSON output: {e}")
+
+
 def main(argv: Optional[list[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="Agent-assisted task bootstrap for pkbllm.")
     ap.add_argument("--target", default=".", help="Target project directory to update (default: cwd).")
-    ap.add_argument("--agent", default="codex", help="Target agent name for installation (default: codex).")
+    ap.add_argument("--agent", default="auto", help="Target install agent (default: auto-detect).")
+    ap.add_argument("--selector", default="auto", help="LLM runner for skill selection: auto|claude|codex.")
     ap.add_argument(
         "--install-mode",
         choices=["copy", "skills-cli", "none"],
@@ -209,7 +273,10 @@ def main(argv: Optional[list[str]] = None) -> int:
     pkb_root = REPO_ROOT
     target = Path(args.target).expanduser().resolve()
     agents_md_path = (target / args.agents_md).resolve()
-    expected_install_dest = _agent_dest(target, args.agent)
+    selector = _resolve_selector(args.selector)
+    agent_info = resolve_agent(args.agent, target=target)
+    args.agent = str(agent_info["selected_agent"])
+    expected_install_dest = copy_install_root(target, args.agent)
 
     debug_dir = Path(args.debug_dir).expanduser().resolve() if args.debug_dir else (pkb_root / "artifacts" / "task-start" / _now_id())
     _ensure_dir(debug_dir)
@@ -219,7 +286,9 @@ def main(argv: Optional[list[str]] = None) -> int:
             "ts": dt.datetime.now(dt.timezone.utc).isoformat(),
             "pkb_root": str(pkb_root),
             "target": str(target),
+            "selector": selector,
             "agent": args.agent,
+            "detected_agents": agent_info["detected_agents"],
             "install_mode": args.install_mode,
             "agents_md": str(agents_md_path),
         },
@@ -229,9 +298,11 @@ def main(argv: Optional[list[str]] = None) -> int:
         raise SystemExit(f"Target directory does not exist: {target}")
 
     if not args.no_interactive:
-        args.agent = _prompt("选择安装目标 agent（codex/agents/agent）", args.agent or "codex")
+        args.agent = _prompt(f"选择安装目标 agent（{prompt_choices_text()}）", args.agent or "auto")
+        agent_info = resolve_agent(args.agent, target=target)
+        args.agent = str(agent_info["selected_agent"])
         args.install_mode = _prompt("安装方式（copy/skills-cli/none）", args.install_mode or "copy")
-        expected_install_dest = _agent_dest(target, args.agent)
+        expected_install_dest = copy_install_root(target, args.agent)
 
     # Gather initial user inputs (minimal + adaptive follow-ups done by the agent).
     task = args.task
@@ -264,7 +335,7 @@ Constraints:
     # Create a temp workspace to run codex with pkb skills mounted under .codex/skills.
     work_dir = debug_dir / "work"
     _ensure_dir(work_dir)
-    _snapshot_skills_for_codex(pkb_root, work_dir)
+    _snapshot_skills_for_runner(pkb_root, work_dir, selector)
 
     # 1) Ask the agent for a few task-specific clarifying questions (brainstorm-lite).
     questions_schema = pkb_root / "evals" / "schemas" / "skill_response.schema.json"
@@ -287,15 +358,25 @@ In `steps`, include the two CLI commands the user will run later:
 - `python .../pkb_agents_md.py recommend --query ...`
 - `python .../pkb_agents_md.py assemble --query ... --agents-md ./AGENTS.md --pick --init`
 """
-    q_obj = _run_codex_exec(
-        prompt=q_prompt,
-        work_dir=work_dir,
-        output_schema=questions_schema,
-        output_last_message=questions_out,
-        timeout_s=max(30, int(args.timeout_s)),
-        debug_dir=debug_dir,
-        tag="questions",
-    )
+    if selector == "codex":
+        q_obj = _run_codex_exec(
+            prompt=q_prompt,
+            work_dir=work_dir,
+            output_schema=questions_schema,
+            output_last_message=questions_out,
+            timeout_s=max(30, int(args.timeout_s)),
+            debug_dir=debug_dir,
+            tag="questions",
+        )
+    else:
+        q_obj = _run_claude_exec(
+            prompt=q_prompt,
+            work_dir=work_dir,
+            output_last_message=questions_out,
+            timeout_s=max(30, int(args.timeout_s)),
+            debug_dir=debug_dir,
+            tag="questions",
+        )
     q_list = q_obj.get("questions") if isinstance(q_obj, dict) else None
     questions: list[str] = [x for x in (q_list or []) if isinstance(x, str)]
     _write_json(debug_dir / "questions.parsed.json", {"questions": questions})
@@ -340,15 +421,25 @@ Constraints:
 - `agents_md.target_path` should be: {args.agents_md!r}
 - If uncertain, include warnings.
 """
-    plan = _run_codex_exec(
-        prompt=plan_prompt,
-        work_dir=work_dir,
-        output_schema=plan_schema,
-        output_last_message=plan_out,
-        timeout_s=max(30, int(args.timeout_s)),
-        debug_dir=debug_dir,
-        tag="plan",
-    )
+    if selector == "codex":
+        plan = _run_codex_exec(
+            prompt=plan_prompt,
+            work_dir=work_dir,
+            output_schema=plan_schema,
+            output_last_message=plan_out,
+            timeout_s=max(30, int(args.timeout_s)),
+            debug_dir=debug_dir,
+            tag="plan",
+        )
+    else:
+        plan = _run_claude_exec(
+            prompt=plan_prompt,
+            work_dir=work_dir,
+            output_last_message=plan_out,
+            timeout_s=max(30, int(args.timeout_s)),
+            debug_dir=debug_dir,
+            tag="plan",
+        )
     _write_json(debug_dir / "plan.parsed.json", plan)
 
     # Validate skills exist.
@@ -386,7 +477,7 @@ Constraints:
         install_mode = args.install_mode
 
     # Ignore any agent-provided destination; compute locally.
-    dest_root = _agent_dest(target, args.agent)
+    dest_root = copy_install_root(target, args.agent)
 
     if install_mode == "none":
         _write_text(debug_dir / "install.txt", "install skipped (mode=none)\n")

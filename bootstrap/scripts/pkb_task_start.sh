@@ -1,25 +1,18 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# pkb_task_start.sh
-#
-# Interactive task bootstrap:
-# - clones pkbllm into a temporary directory
-# - asks a few lightweight "brainstorm" questions about the task
-# - recommends and lets you pick pkbllm skills
-# - installs the picked skills into the target project (copy mode by default)
-# - assembles full SKILL.md bodies into the target project's AGENTS.md
-#
-# Intended to be run via: curl/wget ... | bash
-
 PKB_REPO_URL_DEFAULT="https://github.com/uv-xiao/pkbllm.git"
 PKB_REF_DEFAULT="main"
 
 usage() {
   cat <<'EOF'
 Usage:
-  pkb_task_start.sh [--target <dir>] [--agent <agent>] [--ref <git-ref>] [--repo <git-url>]
-                   [--install-mode <copy|skills-cli|none>] [--keep]
+  pkb_task_start.sh [--target <dir>] [--agent <auto|codex|claude|kimi|agents|agent>] [--ref <git-ref>] [--repo <git-url>]
+                   [--install-mode <copy|skills-cli|none>] [--keep] [--no-interactive]
+                   [--task <text>] [--done <text>] [--constraints <text>] [--skills "<uv-skill ...>"]
+
+Modes:
+  - Human-selected skills: prompts for task context, shows recommended skills, lets you choose or pass `--skills`.
 
 Notes:
   - Default install mode is "copy" (no npx required).
@@ -29,11 +22,16 @@ EOF
 }
 
 TARGET_DIR=""
-AGENT="codex"
+AGENT="auto"
 PKB_REPO_URL="$PKB_REPO_URL_DEFAULT"
 PKB_REF="$PKB_REF_DEFAULT"
 INSTALL_MODE="copy"
 KEEP="0"
+NO_INTERACTIVE="0"
+TASK=""
+DONE=""
+CONSTRAINTS=""
+SKILLS=""
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -43,6 +41,11 @@ while [[ $# -gt 0 ]]; do
     --ref) PKB_REF="${2:-}"; shift 2;;
     --install-mode) INSTALL_MODE="${2:-}"; shift 2;;
     --keep) KEEP="1"; shift 1;;
+    --no-interactive) NO_INTERACTIVE="1"; shift 1;;
+    --task) TASK="${2:-}"; shift 2;;
+    --done) DONE="${2:-}"; shift 2;;
+    --constraints) CONSTRAINTS="${2:-}"; shift 2;;
+    --skills) SKILLS="${2:-}"; shift 2;;
     -h|--help) usage; exit 0;;
     *) echo "Unknown arg: $1" >&2; usage; exit 2;;
   esac
@@ -72,14 +75,28 @@ fi
 
 PROMPT_TTY="/dev/tty"
 if [[ ! -r "${PROMPT_TTY}" ]]; then
-  # If no tty (rare), fall back to stdin.
   PROMPT_TTY="/dev/stdin"
+fi
+
+if [[ "${NO_INTERACTIVE}" != "1" && ! -r /dev/tty && ! -t 0 ]]; then
+  cat >&2 <<'EOF'
+ERROR: stdin is not interactive, so human-selected mode cannot prompt here.
+
+Use one of these forms:
+  .../pkb_task_start.sh | bash -s -- --no-interactive --task "..." --done "..." --skills "uv-brainstorming uv-writing-plans"
+  .../pkb_task_start_agent.sh | bash -s -- --no-interactive --task "..." --done "..."
+EOF
+  exit 2
 fi
 
 prompt() {
   local label="$1"
   local default="${2:-}"
   local ans=""
+  if [[ "${NO_INTERACTIVE}" == "1" ]]; then
+    printf '%s' "${default}"
+    return 0
+  fi
   if [[ -n "${default}" ]]; then
     read -r -p "${label} [${default}]: " ans <"${PROMPT_TTY}" || true
     if [[ -z "${ans}" ]]; then
@@ -93,6 +110,10 @@ prompt() {
 
 prompt_multiline() {
   local label="$1"
+  if [[ "${NO_INTERACTIVE}" == "1" ]]; then
+    printf '%s' "${CONSTRAINTS}"
+    return 0
+  fi
   echo "${label} (end with an empty line):" >&2
   local lines=()
   while true; do
@@ -104,24 +125,14 @@ prompt_multiline() {
   printf '%s\n' "${lines[@]}"
 }
 
-echo "== pkbllm task bootstrap ==" >&2
-echo "Target project: ${TARGET_DIR}" >&2
-echo "Agent: ${AGENT}" >&2
-echo "pkbllm repo: ${PKB_REPO_URL} (${PKB_REF})" >&2
-echo "Install mode: ${INSTALL_MODE}" >&2
+resolve_agent_json() {
+  python3 "$1/bootstrap/scripts/pkb_install_lib.py" --target "${TARGET_DIR}" --requested-agent "$2"
+}
 
-TASK="$(prompt "One-sentence task description" "")"
-DONE="$(prompt "Definition of done (1 sentence)" "")"
-CONSTRAINTS="$(prompt_multiline "Constraints / preferences (deps, network, style, repo rules)")"
-
-QUERY=$(
-  cat <<EOF
-Task: ${TASK}
-Done: ${DONE}
-Constraints:
-${CONSTRAINTS}
-EOF
-)
+json_field() {
+  local field="$1"
+  python3 -c 'import json, sys; data=json.load(sys.stdin); value=data[sys.argv[1]]; print(" ".join(str(x) for x in value) if isinstance(value, list) else value)' "$field"
+}
 
 TMP_ROOT="$(mktemp -d)"
 PKB_DIR="${TMP_ROOT}/pkbllm"
@@ -140,6 +151,45 @@ git clone --depth 1 --filter=blob:none --branch "${PKB_REF}" "${PKB_REPO_URL}" "
   exit 1
 }
 
+AGENT_INFO="$(resolve_agent_json "${PKB_DIR}" "${AGENT}")"
+SELECTED_AGENT="$(printf '%s' "${AGENT_INFO}" | json_field selected_agent)"
+DETECTED_AGENTS="$(printf '%s' "${AGENT_INFO}" | json_field detected_agents)"
+
+if [[ "${NO_INTERACTIVE}" != "1" ]]; then
+  echo "== pkbllm task bootstrap ==" >&2
+  echo "Target project: ${TARGET_DIR}" >&2
+  echo "Detected agents: ${DETECTED_AGENTS:-none}" >&2
+  AGENT="$(prompt "Select target agent (auto/claude/codex/kimi/agents/agent)" "${AGENT}")"
+  AGENT_INFO="$(resolve_agent_json "${PKB_DIR}" "${AGENT}")"
+  SELECTED_AGENT="$(printf '%s' "${AGENT_INFO}" | json_field selected_agent)"
+  TASK="${TASK:-$(prompt "One-sentence task description" "")}"
+  DONE="${DONE:-$(prompt "Definition of done (1 sentence)" "")}"
+  if [[ -z "${CONSTRAINTS}" ]]; then
+    CONSTRAINTS="$(prompt_multiline "Constraints / preferences (deps, network, style, repo rules)")"
+  fi
+fi
+
+if [[ -z "${TASK}" ]]; then
+  echo "ERROR: --task is required." >&2
+  exit 2
+fi
+if [[ -z "${DONE}" ]]; then
+  echo "ERROR: --done is required." >&2
+  exit 2
+fi
+
+QUERY=$(
+  cat <<EOF
+Task: ${TASK}
+Done: ${DONE}
+Constraints:
+${CONSTRAINTS}
+EOF
+)
+
+echo "Selected install agent: ${SELECTED_AGENT}" >&2
+echo "Install mode: ${INSTALL_MODE}" >&2
+
 RECOMMEND_OUT="$(
   python3 "${PKB_DIR}/bootstrap/scripts/pkb_agents_md.py" --source mirror recommend --query "${QUERY}" --top 12
 )"
@@ -154,25 +204,34 @@ if [[ "${#REC_SKILLS[@]}" -eq 0 ]]; then
   exit 1
 fi
 
-echo "" >&2
-echo "Pick skills to embed into ${TARGET_DIR}/AGENTS.md:" >&2
-for i in "${!REC_SKILLS[@]}"; do
-  printf "  %2d) %s\n" "$((i+1))" "${REC_SKILLS[$i]}" >&2
-done
-SEL="$(prompt "Enter numbers (e.g. 1 2 5), or 'a' for all, default '1 2 3'" "1 2 3")"
-
 CHOSEN=()
-if [[ "${SEL}" == "a" || "${SEL}" == "A" ]]; then
-  CHOSEN=("${REC_SKILLS[@]}")
+if [[ -n "${SKILLS}" ]]; then
+  while read -r skill; do
+    [[ -n "${skill}" ]] && CHOSEN+=("${skill}")
+  done < <(printf '%s\n' "${SKILLS}" | tr ', ' '\n' | sed '/^$/d')
 else
-  for tok in ${SEL}; do
-    if [[ "${tok}" =~ ^[0-9]+$ ]]; then
-      idx=$((tok-1))
-      if [[ "${idx}" -ge 0 && "${idx}" -lt "${#REC_SKILLS[@]}" ]]; then
-        CHOSEN+=("${REC_SKILLS[$idx]}")
-      fi
-    fi
+  if [[ "${NO_INTERACTIVE}" == "1" ]]; then
+    echo "ERROR: --skills is required in --no-interactive human-selected mode." >&2
+    exit 2
+  fi
+  echo "" >&2
+  echo "Pick skills to embed into ${TARGET_DIR}/AGENTS.md:" >&2
+  for i in "${!REC_SKILLS[@]}"; do
+    printf "  %2d) %s\n" "$((i+1))" "${REC_SKILLS[$i]}" >&2
   done
+  SEL="$(prompt "Enter numbers (e.g. 1 2 5), or 'a' for all, default '1 2 3'" "1 2 3")"
+  if [[ "${SEL}" == "a" || "${SEL}" == "A" ]]; then
+    CHOSEN=("${REC_SKILLS[@]}")
+  else
+    for tok in ${SEL}; do
+      if [[ "${tok}" =~ ^[0-9]+$ ]]; then
+        idx=$((tok-1))
+        if [[ "${idx}" -ge 0 && "${idx}" -lt "${#REC_SKILLS[@]}" ]]; then
+          CHOSEN+=("${REC_SKILLS[$idx]}")
+        fi
+      fi
+    done
+  fi
 fi
 
 if [[ "${#CHOSEN[@]}" -eq 0 ]]; then
@@ -180,12 +239,15 @@ if [[ "${#CHOSEN[@]}" -eq 0 ]]; then
   exit 1
 fi
 
-# De-dup preserve order
 DEDUP=()
 SEEN=""
 for s in "${CHOSEN[@]}"; do
   if [[ " ${SEEN} " == *" ${s} "* ]]; then
     continue
+  fi
+  if [[ ! -d "${PKB_DIR}/skills/${s}" ]]; then
+    echo "ERROR: unknown skill: ${s}" >&2
+    exit 2
   fi
   SEEN="${SEEN} ${s}"
   DEDUP+=("${s}")
@@ -213,26 +275,23 @@ if [[ "${INSTALL_MODE}" == "none" ]]; then
 fi
 
 if [[ "${INSTALL_MODE}" == "copy" ]]; then
+  DEST_ROOT="$(printf '%s' "${AGENT_INFO}" | json_field copy_install_dir)"
   echo "" >&2
-  echo "Installing skills by copying into ${TARGET_DIR}/.codex/skills/ ..." >&2
-  mkdir -p "${TARGET_DIR}/.codex/skills"
+  echo "Installing skills by copying into ${DEST_ROOT} ..." >&2
+  mkdir -p "${DEST_ROOT}"
   for s in "${CHOSEN[@]}"; do
     src="${PKB_DIR}/skills/${s}"
-    dst="${TARGET_DIR}/.codex/skills/${s}"
-    if [[ ! -d "${src}" ]]; then
-      echo "WARN: missing in mirror: ${src} (skipping install for ${s})" >&2
-      continue
-    fi
+    dst="${DEST_ROOT}/${s}"
     rm -rf "${dst}" || true
     python3 - <<PY
-import shutil, os
+import shutil
 from pathlib import Path
-src=Path(${src@Q})
-dst=Path(${dst@Q})
+src = Path(${src@Q})
+dst = Path(${dst@Q})
 dst.parent.mkdir(parents=True, exist_ok=True)
 shutil.copytree(src, dst, copy_function=shutil.copy2)
 PY
-    echo "  installed: ${s} -> .codex/skills/${s}" >&2
+    echo "  installed: ${s} -> ${dst}" >&2
   done
   echo "Done." >&2
   exit 0
@@ -242,8 +301,8 @@ if [[ "${INSTALL_MODE}" == "skills-cli" ]]; then
   echo "" >&2
   echo "Installing skills via Skills CLI into the target project..." >&2
   for s in "${CHOSEN[@]}"; do
-    (cd "${TARGET_DIR}" && npx -y skills add "${PKB_DIR}" -a "${AGENT}" --skill "${s}" -y) >/dev/null
-    echo "  installed: ${s} (agent=${AGENT})" >&2
+    (cd "${TARGET_DIR}" && npx -y skills add "${PKB_DIR}" -a "${SELECTED_AGENT}" --skill "${s}" -y) >/dev/null
+    echo "  installed: ${s} (agent=${SELECTED_AGENT})" >&2
   done
   echo "Done." >&2
   exit 0
@@ -251,4 +310,3 @@ fi
 
 echo "ERROR: unknown install mode: ${INSTALL_MODE}" >&2
 exit 2
-

@@ -1,0 +1,45 @@
+name: Install Checks
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  deterministic-install-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Regenerate mirror and README tables
+        run: python bootstrap/scripts/update_skills_mirror.py all
+
+      - name: Ensure generated files are committed
+        run: git diff --exit-code
+
+      - name: Lint skills and eval metadata
+        run: python bootstrap/scripts/lint_skills.py --check-evals
+
+      - name: Compile bootstrap Python entrypoints
+        run: |
+          python -m py_compile \
+            bootstrap/scripts/pkb_install_lib.py \
+            bootstrap/scripts/pkb_task_start_agent.py \
+            bootstrap/scripts/run_llm_install_check.py
+
+      - name: Run bootstrap tests
+        run: |
+          python -m unittest \
+            bootstrap.scripts.test_bootstrap_install_modes \
+            bootstrap.scripts.test_pkb_task_start_agent_sh \
+            -v

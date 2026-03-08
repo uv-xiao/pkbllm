@@ -12,19 +12,20 @@ PKB_REF_DEFAULT="main"
 usage() {
   cat <<'EOF'
 Usage:
-  pkb_task_start_agent.sh [--target <dir>] [--agent <agent>] [--ref <git-ref>] [--repo <git-url>]
+  pkb_task_start_agent.sh [--target <dir>] [--agent <agent>] [--selector <auto|claude|codex>] [--ref <git-ref>] [--repo <git-url>]
                          [--install-mode <copy|skills-cli|none>] [--keep] [--no-interactive]
                          [--task <text>] [--done <text>] [--constraints <text>]
 
 Notes:
-  - Requires `git`, `python3`, and `codex` (Codex CLI) for the agent step.
+  - Requires `git`, `python3`, and an LLM runner CLI (`claude` or `codex`) for the agent step.
   - Default install mode is "copy" (no npx required).
   - Writes debug logs under the cloned pkbllm `artifacts/task-start/<ts>/`.
 EOF
 }
 
 TARGET_DIR="."
-AGENT="codex"
+AGENT="auto"
+SELECTOR="auto"
 PKB_REPO_URL="$PKB_REPO_URL_DEFAULT"
 PKB_REF="$PKB_REF_DEFAULT"
 INSTALL_MODE="copy"
@@ -39,6 +40,7 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     --target) TARGET_DIR="${2:-}"; shift 2;;
     --agent) AGENT="${2:-}"; shift 2;;
+    --selector) SELECTOR="${2:-}"; shift 2;;
     --repo) PKB_REPO_URL="${2:-}"; shift 2;;
     --ref) PKB_REF="${2:-}"; shift 2;;
     --install-mode) INSTALL_MODE="${2:-}"; shift 2;;
@@ -61,7 +63,6 @@ need_cmd() {
 
 need_cmd git
 need_cmd python3
-need_cmd codex
 
 TMP_ROOT="$(mktemp -d)"
 PKB_DIR="${TMP_ROOT}/pkbllm"
@@ -97,7 +98,7 @@ EOF
   fi
 fi
 
-ARGS=(--target "${TARGET_DIR}" --agent "${AGENT}" --install-mode "${INSTALL_MODE}")
+ARGS=(--target "${TARGET_DIR}" --agent "${AGENT}" --selector "${SELECTOR}" --install-mode "${INSTALL_MODE}")
 if [[ "${NO_INTERACTIVE}" == "1" ]]; then
   ARGS+=(--no-interactive)
 fi

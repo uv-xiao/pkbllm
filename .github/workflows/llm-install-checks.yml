@@ -1,0 +1,44 @@
+name: LLM Install Checks
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 4 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  claude-kimi-install-check:
+    runs-on: ubuntu-latest
+    env:
+      KIMI_API_KEY: ${{ secrets.KIMI_API_KEY }}
+      ANTHROPIC_BASE_URL: https://api.kimi.com/coding/
+      ANTHROPIC_MODEL: kimi-for-coding
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate secrets are available
+        run: |
+          test -n "${KIMI_API_KEY}"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Claude Code CLI
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Run Claude-selected install check against Kimi target
+        run: |
+          python bootstrap/scripts/run_llm_install_check.py \
+            --selector claude \
+            --agent kimi \
+            --install-mode copy
